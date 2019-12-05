@@ -43,7 +43,7 @@ app.set('view engine', 'ejs');
 // các cài đặt cần thiết cho passport
 app.use(express_session({
       secret: 'ilovescodetheworld',
-      cookie: {maxAge: 60000},
+      cookie: {maxAge: 864000},
       resave: true,
       saveUninitialized: true
     }

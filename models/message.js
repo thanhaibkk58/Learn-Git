@@ -2,11 +2,6 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var messageSchema = new Schema({
-    _id: {
-        type: mongoose.Schema.ObjectID,
-        required: true,
-        unique: true
-    },
     content: {
         type: String,
         required: true
@@ -15,13 +10,13 @@ var messageSchema = new Schema({
         type: String,
         required: true
     },
-    conversationID: {
-        type: mongoose.Schema.ObjectID,
-        ref: "Conversation"
-    },
     sender: {
-        type: mongoose.Schema.ObjectID,
+        type: Schema.Types.ObjectId,
+        required: true,
         ref: "User"
+    },
+    receiver: { // conversationID or userID
+        type: Schema.Types.ObjectId
     },
     created_at: {
         type: Date,

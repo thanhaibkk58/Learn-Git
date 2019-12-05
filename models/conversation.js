@@ -2,24 +2,21 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var conversationSchema = new Schema({
-    _id: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        unique: true
-    },
-    type: {
-        type: String, // "private" or "group",
-        required: true
-    },
     name: {
         type: String,
         required: true,
         default: "No Name"
     },
-    participants: {
-        type: [Schema.Types.ObjectId],
+    participants: [{
+        type: Schema.Types.ObjectId,
         required: true,
-        default: []
+        default: [],
+        ref: "User"
+    }],
+    created_by: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "User"
     },
     created_at: {
         type: Date,

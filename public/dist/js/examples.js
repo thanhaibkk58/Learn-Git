@@ -12,7 +12,7 @@ $(function () {
                 if (chat_body.length > 0) {
 
                     type = type ? type : '';
-                    message = message ? message : 'Lorem ipsum dolor sit amet.';
+                    message = message ? message : 'Null';
 
                     $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-content">' + message + '</div><div class="message-action">PM 14:25 ' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
 
@@ -35,21 +35,22 @@ $(function () {
         $('#call').modal('show');
     }, 2000);
 
-    $(document).on('submit', '.layout .content .chat .chat-footer form', function (e) {
-        e.preventDefault();
-
-        var input = $(this).find('input[type=text]');
-        var message = input.val();
-
-        message = $.trim(message);
-
-        if (message) {
-            SohoExamle.Message.add(message, 'outgoing-message');
-            input.val('');
-        } else {
-            input.focus();
-        }
-    });
+    // $(document).on('submit', '.layout .content .chat .chat-footer form', function (e) {
+    //     e.preventDefault();
+    //
+    //     var input = $(this).find('input[type=text]');
+    //     var message = input.val();
+    //
+    //     message = $.trim(message);
+    //
+    //     if (message) {
+    //         // SohoExamle.Message.add(message, 'outgoing-message');
+    //         SohoExamle.Message.add(message, 'outgoing-message');
+    //         input.val('');
+    //     } else {
+    //         input.focus();
+    //     }
+    // });
 
     $(document).on('click', '.layout .content .sidebar-group .sidebar .list-group-item', function () {
         if (jQuery.browser.mobile) {

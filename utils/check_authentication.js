@@ -5,7 +5,7 @@ function checkAuthentication(req,res,next){
         next();
     } else{
         console.error("Ban chua dang nhap!!!!");
-        res.redirect("/signup");
+        res.redirect("/login");
     }
 }
 

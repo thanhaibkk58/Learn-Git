@@ -20,6 +20,12 @@ router.post("/signup", passport.authenticate("local-signup", {
     failureFlash : true
 }));
 
+// Test post
+// router.post("/signup", function (req, res){
+//     console.error("-------------------------------request: " + req.body.email);
+//     res.redirect("/");
+// });
+
 // Hiển thị form login
 router.get('/login', function (req, res) {
     // Hiển thị trang và truyển lại những tin nhắn từ phía server nếu có

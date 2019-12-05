@@ -11,11 +11,9 @@ var checkAuthentication = require("../utils/check_authentication");
 router.post("/add_friend", checkAuthentication, function (req, res) {
     if (!req.body) return res.status(400);
     var friend = new Friend({
-        userID1: req.user.userID,
+        userID1: req.user._id,
         userID2: req.body.userID2,
     });
-
-    console.error(req.user);
 
     Friend.create(friend, function (err, result) {
         if (err) return res.status(500);
@@ -50,10 +48,10 @@ router.delete("/delete_friend", checkAuthentication, function(req, res){
         $or: [
             {
                 userID1: req.body.userID1,
-                userID2: req.user.userID
+                userID2: req.user._id
             },
             {
-                userID1: req.user.userID,
+                userID1: req.user._id,
                 userID2: req.body.userID1
             }
         ]
@@ -72,19 +70,19 @@ router.get("/all_friends", checkAuthentication, function (req, res) {
     var filter = {
         $or: [
             {
-                userID1: req.body.userID,
+                userID1: req.user._id,
                 status: true
             },
             {
-                userID2: req.body.userID,
+                userID2: req.user._id,
                 status: true
             }
         ]
     };
 
-    Friend.find(filter, function (err, result) {
-        if (err) return res.status(400);
-        res.json(result);
+    Friend.find(filter).populate("userID1").populate("userID2").exec(function (err, friends) {
+        if (err) console.error(err);
+        res.json(friends);
     });
 });
 

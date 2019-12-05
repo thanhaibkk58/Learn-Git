@@ -1,7 +1,7 @@
 @import url(https://fonts.googleapis.com/css?family=Nunito:400,400i,600,700&display=swap&subset=latin-ext);
 @import url(../../vendor/bootstrap/bootstrap.min.css);
-@import url(../../dist/icons/themify/themify-icons.css);
-@import url(../../dist/icons/font-awesome/css/font-awesome.min.css);
+@import url(../icons/themify/themify-icons.css);
+@import url(../icons/font-awesome/css/font-awesome.min.css);
 .bg-primary {
   background: #3db16b !important;
   color: white !important;
@@ -3145,7 +3145,7 @@ body.dark figure.avatar.avatar-state-danger:before, body.dark figure.avatar.avat
 }
 
 body.form-membership {
-  background: url(../../dist/media/img/bg.png) white;
+  background: url(../media/img/bg.png) white;
   background-attachment: fixed;
   -webkit-background-size: cover;
      -moz-background-size: cover;
