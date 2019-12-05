@@ -34,6 +34,7 @@ module.exports = function (passport) {
             passReqToCallback: true // cho phép chúng ta gửi request lại hàm callback
         },
         function (req, email, password, done) {
+        // console.error(req.body);
             // asynchronous
             // Hàm callback của nextTick chỉ được thực hiện khi hàm trên nó trong stack (LIFO) được thực hiện
             // User.findOne sẽ không được gọi cho tới khi dữ liệu được gửi lại
@@ -53,15 +54,15 @@ module.exports = function (passport) {
                         var newUser = new User();
 
                         // lưu thông tin cho tài khoản local
-                        newUser.userID = new mongoose.Types.ObjectId,
                         newUser.email = email;
                         newUser.en_password = newUser.generateHash(password);
-                        newUser.firstname = req.param("firstname");
-                        newUser.lastname = req.param("lastname");
+                        newUser.firstname = req.body.firstname;
+                        newUser.lastname = req.body.lastname;
                         // lưu user
                         newUser.save(function (err) {
                             if (err)
                                 throw err;
+                            console.error(newUser.email + " has been created!");
                             return done(null, newUser);
                         });
                     }
