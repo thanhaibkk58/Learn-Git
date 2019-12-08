@@ -310,7 +310,8 @@
                                             <i class="ti-email"></i>
                                         </span>
                                     </div>
-                                    <input type="text" class="form-control" id="email" name="email" value="<%= user.email %>">
+                                    <input type="text" class="form-control" id="email" name="email"
+                                           value="<%= user.email %>">
                                 </div>
                             </div>
                             <!-- Firstname -->
@@ -350,7 +351,8 @@
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input" id="customFile" name="image"
                                                enctype="multipart/form-data">
-                                        <label class="custom-file-label" for="customFile" id="label_choose_image">Choose file</label>
+                                        <label class="custom-file-label" for="customFile" id="label_choose_image">Choose
+                                            file</label>
                                     </div>
                                 </div>
                             </div>
@@ -404,8 +406,12 @@
                     <div class="tab-pane show active" id="personal" role="tabpanel">
                         <form>
 
-                            <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg" alt="Avatar"
-                                 class="rounded-circle" style="width:100px; padding-bottom: 20px">
+                            <!--                            <img src="https://via.placeholder.com/150" id="fr_avatar" alt="Avatar"-->
+                            <!--                                 class="rounded-circle" style="width:100px; padding-bottom: 20px">-->
+
+                            <figure class="avatar avatar-xl mb-4">
+                                <img src="https://via.placeholder.com/150" id="fr_avatar" class="rounded-circle">
+                            </figure>
 
                             <div class="form-group">
                                 <label for="email" class="col-form-label">Email</label>
@@ -968,32 +974,12 @@
                     </div>
                     <hr>
                     <div class="pl-4 pr-4">
-                        <h6>Website</h6>
-                        <p>
-                            <a href="#">www.franshanscombe.com</a>
-                        </p>
+                        <h6>Phone number</h6>
+                        <p class="text-muted">0366675787</p>
                     </div>
                     <hr>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="customSwitch11">
-                                <label class="custom-control-label" for="customSwitch11">Block</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" checked="" id="customSwitch12">
-                                <label class="custom-control-label" for="customSwitch12">Mute</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="customSwitch13">
-                                <label class="custom-control-label" for="customSwitch13">Get notification</label>
-                            </div>
-                        </div>
+                    <div class="form-group text-xl-center">
+                        <button type="button" class="btn btn-outline-danger btn-block">Delete Friend</button>
                     </div>
                 </div>
             </div>
@@ -1076,7 +1062,7 @@
             li_item.innerHTML = "" +
                 "                            <div >\n" +
                 "                                <figure class=\"avatar\">\n" +
-                "                                    <img src=\"https://via.placeholder.com/150\" class=\"rounded-circle\">\n" +
+                "                                    <img src=" + friend.avatar_url + " class=\"rounded-circle\">\n" +
                 "                                </figure>\n" +
                 "                            </div>\n" +
                 "                            <div class=\"users-list-body\">\n" +
@@ -1095,6 +1081,8 @@
             document.getElementById("fr_fullname").value = json[index].userID1.firstname + " " + json[index].userID1.lastname;
             document.getElementById("fr_email").value = json[index].userID1.email;
             document.getElementById("fr_sex").value = json[index].userID1.sex;
+            document.getElementById("fr_avatar").src = json[index].userID1.avatar_url;
+            console.log("URL: " + json[index].userID1.avatar_url);
         });
 
         $('#ul-list-request-friends li button').click(function (event) {
@@ -1125,7 +1113,7 @@
             li_item.innerHTML = "" +
                 "                            <div >\n" +
                 "                                <figure class=\"avatar\">\n" +
-                "                                    <img src=\"https://via.placeholder.com/150\" class=\"rounded-circle\">\n" +
+                "                                    <img src=" + friend.avatar_url + " class=\"rounded-circle\">\n" +
                 "                                </figure>\n" +
                 "                            </div>\n" +
                 "                            <div class=\"users-list-body\">\n" +
@@ -1170,7 +1158,7 @@
             console.log(new Date());
             ChatSocket.Message.add(message, formatDate(new Date()), 'outgoing-message');
             input.val('');
-            socket.emit("send-message-to-server", {message: message, toUser: receiverID});
+            socket.emit("send-message-to-server", {message: message, userID: userID, toUser: receiverID});
         } else {
             input.focus();
         }
@@ -1188,7 +1176,7 @@
             li_item.innerHTML = "" +
                 "                            <div >\n" +
                 "                                <figure class=\"avatar\">\n" +
-                "                                    <img src=\"https://via.placeholder.com/150\" class=\"rounded-circle\">\n" +
+                "                                    <img src=" + friend.avatar_url + " class=\"rounded-circle\">\n" +
                 "                                </figure>\n" +
                 "                            </div>\n" +
                 "                            <div class=\"users-list-body\">\n" +
