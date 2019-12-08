@@ -89,7 +89,7 @@ module.exports.sockets = function (http) {
                 content: data.message,
                 type: "text",
                 receiver: currentRoom,
-                sender: userID,
+                sender: data.userID,
                 created_at: Date.now()
             });
             messages_controller.createNewMessage(message, function (err, mess) {
