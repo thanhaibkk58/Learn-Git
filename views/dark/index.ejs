@@ -287,19 +287,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#personal" role="tab"
-                           aria-controls="personal" aria-selected="true">Personal</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#about" role="tab" aria-controls="about"
-                           aria-selected="false">About</a>
-                    </li>
-                </ul>
                 <div class="tab-content">
                     <div class="tab-pane show active" id="personal" role="tabpanel">
-                        <form>
+                        <form action="/user/update" method="POST" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="email" class="col-form-label">ID</label>
                                 <div class="input-group">
@@ -320,19 +310,33 @@
                                             <i class="ti-email"></i>
                                         </span>
                                     </div>
-                                    <input type="text" class="form-control" id="email" value="<%= user.email %>">
+                                    <input type="text" class="form-control" id="email" name="email" value="<%= user.email %>">
                                 </div>
                             </div>
+                            <!-- Firstname -->
                             <div class="form-group">
-                                <label for="fullname" class="col-form-label">Fullname</label>
+                                <label for="fullname" class="col-form-label">First name</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">
                                             <i class="ti-user"></i>
                                         </span>
                                     </div>
-                                    <input type="text" class="form-control" id="fullname"
-                                           value="<%= user.firstname + " " + user.lastname %>">
+                                    <input type="text" class="form-control" id="fullname" name="firstname"
+                                           value="<%= user.firstname %>">
+                                </div>
+                            </div>
+                            <!-- Lastname -->
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">Last name</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control" id="fullname" name="lastname"
+                                           value="<%= user.lastname %>">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -344,8 +348,9 @@
                                         </figure>
                                     </div>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="customFile">
-                                        <label class="custom-file-label" for="customFile">Choose file</label>
+                                        <input type="file" class="custom-file-input" id="customFile" name="image"
+                                               enctype="multipart/form-data">
+                                        <label class="custom-file-label" for="customFile" id="label_choose_image">Choose file</label>
                                     </div>
                                 </div>
                             </div>
@@ -371,37 +376,12 @@
                                     <input type="text" class="form-control" id="phone" placeholder="(555) 555 55 55">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="website" class="col-form-label">Website</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">
-                                            <i class="ti-link"></i>
-                                        </span>
-                                    </div>
-                                    <input type="text" class="form-control" id="website">
-                                </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Save</button>
                             </div>
                         </form>
                     </div>
-                    <div class="tab-pane" id="about" role="tabpanel">
-                        <form action="">
-                            <div class="form-group">
-                                <label for="about-text" class="col-form-label">Write a few words that describe
-                                    you</label>
-                                <textarea class="form-control" id="about-text"></textarea>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" checked id="customCheck1">
-                                <label class="custom-control-label" for="customCheck1">View profile</label>
-                            </div>
-                        </form>
-                    </div>
-
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>
@@ -892,7 +872,7 @@
         <!-- ./ chat -->
 
         <div class="sidebar-group">
-            <div id="contact-information" class="sidebar">
+            <div id="contact-information" class="sidebar active">
                 <header>
                     <span>About</span>
                     <ul class="list-inline">
@@ -905,22 +885,25 @@
                 </header>
                 <div class="sidebar-body">
                     <div class="pl-4 pr-4 text-center">
-                        <figure class="avatar avatar-state-danger avatar-xl mb-4">
-                            <img src="https://via.placeholder.com/150" class="rounded-circle">
+                        <figure class="avatar avatar-xl mb-4">
+                            <img src="https://via.placeholder.com/150" id="profile_friend_avt" class="rounded-circle">
                         </figure>
-                        <h5 class="text-primary">Frans Hanscombe</h5>
+                        <h5 class="text-primary" id="profile_friend_fullname">Fullname</h5>
                         <p class="text-muted">Last seen: Today</p>
                     </div>
                     <hr>
                     <div class="pl-4 pr-4">
-                        <h6>About</h6>
-                        <p class="text-muted">I love reading, traveling and discovering new things. You need to be happy
-                            in life.</p>
+                        <h6>Email</h6>
+                        <p class="text-muted" id="profile_friend_email">example@gmail.com</p>
                     </div>
                     <hr>
                     <div class="pl-4 pr-4">
-                        <h6>Phone</h6>
-                        <p class="text-muted">(555) 555 55 55</p>
+                        <h6>First name</h6>
+                        <p class="text-muted" id="profile_friend_firstname">Tên</p>
+                    </div>
+                    <div class="pl-4 pr-4">
+                        <h6>Last name</h6>
+                        <p class="text-muted" id="profile_friend_lastname">Họ Đệm</p>
                     </div>
                     <hr>
                     <div class="pl-4 pr-4">
@@ -1047,7 +1030,8 @@
     var socket = io("/");
     var roomID;
     var receiverID;
-    var users_temp = []; //
+    var users_temp = [];
+    var list_friends = [];
 
     var userID = document.getElementById("userID").value;
 
@@ -1074,6 +1058,10 @@
                 }
             }
         }
+    };
+
+    document.getElementById("customFile").onchange = function () {
+        document.getElementById("label_choose_image").innerHTML = "1 file selected";
     };
 
     socket.on("set-all-request-friends", function (friends) {
@@ -1254,7 +1242,6 @@
         var json = JSON.parse(friends);
         var ul_list_friends = document.getElementById("ul-list-friends");
         // $('#ul-list-friends').empty();
-        var list_friends = [];
 
         for (var i = 0; i < json.length; i++) {
             let friend;
@@ -1288,6 +1275,12 @@
 
             document.getElementById("fr_chat_fullname").innerHTML = list_friends[index].firstname + " " + list_friends[index].lastname;
             document.getElementById("fr_chat_avatar").src = list_friends[index].avatar_url;
+
+            document.getElementById("profile_friend_fullname").innerHTML = list_friends[index].firstname + " " + list_friends[index].lastname;
+            document.getElementById("profile_friend_avt").src = list_friends[index].avatar_url;
+            document.getElementById("profile_friend_email").innerHTML = list_friends[index].email;
+            document.getElementById("profile_friend_firstname").innerHTML = list_friends[index].firstname;
+            document.getElementById("profile_friend_lastname").innerHTML = list_friends[index].lastname;
         });
     });
 
