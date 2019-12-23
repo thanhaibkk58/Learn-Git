@@ -42,7 +42,7 @@ router.put("/accept", checkAuthentication, function (req, res) {
 
 /* ---------------------------------------------------- */
 /* DELETE - Delete friend */
-router.delete("/delete_friend", checkAuthentication, function(req, res){
+router.post("/delete_friend", checkAuthentication, function(req, res){
     if (!req.body) return res.status(400);
     var filter = {
         $or: [
