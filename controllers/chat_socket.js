@@ -42,7 +42,6 @@ module.exports.sockets = function (http) {
         });
 
         socket.on("send-users-temp", function (data) {
-            data.push(userID);
             // get All Users
             User.find({"_id": {$nin: data}}, function (err, results) {
                 if (err) console.error(err);
