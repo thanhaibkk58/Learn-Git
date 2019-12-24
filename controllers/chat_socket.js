@@ -86,7 +86,7 @@ module.exports.sockets = function (http) {
         socket.on("send-message-to-server", function (data) {
             var message = new Message({
                 content: data.message,
-                type: "text",
+                type: data.type,
                 receiver: currentRoom,
                 sender: data.userID,
                 created_at: Date.now()
