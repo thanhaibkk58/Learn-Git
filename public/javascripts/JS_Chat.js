@@ -13,7 +13,7 @@ socket.on("connect", function () {
 
 var ChatSocket = {
     Message: {
-        add: function (message, time, type) {
+        addText: function (message, time, type) {
             var chat_body = $('.layout .content .chat .chat-body');
             if (chat_body.length > 0) {
 
@@ -21,6 +21,24 @@ var ChatSocket = {
                 message = message ? message : 'Null';
 
                 $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-content">' + message + '</div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
+
+                chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
+                    cursorcolor: 'rgba(66, 66, 66, 0.20)',
+                    cursorwidth: "4px",
+                    cursorborder: '0px'
+                }).resize();
+            }
+        },
+
+        // Test add image:
+        addImage: function (message, time, type) {
+            var chat_body = $('.layout .content .chat .chat-body');
+            if (chat_body.length > 0) {
+
+                type = type ? type : '';
+                message = message ? message : 'Null';
+
+                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><img class="message-content" style="width:360px;" src="' + message + '" ></img><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -160,9 +178,9 @@ $(document).on('submit', '.layout .content .chat .chat-footer form', function (e
 
     if (message) {
         console.log(new Date());
-        ChatSocket.Message.add(message, formatDate(new Date()), 'outgoing-message');
+        ChatSocket.Message.addText(message, formatDate(new Date()), 'outgoing-message');
         input.val('');
-        socket.emit("send-message-to-server", {message: message, userID: userID, toUser: idUserSelected});
+        socket.emit("send-message-to-server", {message: message, userID: userID, type: "text", toUser: idUserSelected});
     } else {
         input.focus();
     }
@@ -170,12 +188,20 @@ $(document).on('submit', '.layout .content .chat .chat-footer form', function (e
 
 // Send image
 $("#input_image").change(function(){
+
+    var data = new FormData();
+    data.append('image', document.getElementById('input_image').files[0]);
+
     $.ajax({
         url: "/upload",
         type: "post",
-        data: {image: $('#input_image').val()},
+        processData: false, // important
+        contentType: false, // important
+        data: data,
         success: function (response) {
-            // window.location.replace("/");
+            console.log(response);
+            ChatSocket.Message.addImage(response.url, formatDate(new Date()), 'outgoing-message');
+            socket.emit("send-message-to-server", {message: response.url, userID: userID, type: "image", toUser: idUserSelected});
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.log(textStatus, errorThrown);
@@ -231,18 +257,29 @@ socket.on("get-old-messages", function (json_data) {
         var message = data[i].content;
         var date = formatDate(new Date(data[i].created_at));
 
-
         if (data[i].sender._id === userID) {
-            ChatSocket.Message.add(message, date, 'outgoing-message');
+            if (data[i].type === "text"){
+                ChatSocket.Message.addText(message, date, 'outgoing-message');
+            } else {
+                ChatSocket.Message.addImage(message, date, 'outgoing-message');
+            }
         } else {
-            ChatSocket.Message.add(message, date, '');
+            if (data[i].type === "text") {
+                ChatSocket.Message.addText(message, date, '');
+            } else {
+                ChatSocket.Message.addImage(message, date, '');
+            }
         }
     }
 });
 
 socket.on("emit-message-to-receiver", function (data) {
     var date = formatDate(new Date(data.created_at));
-    ChatSocket.Message.add(data.content, date, '');
+    if (data.type === "text"){
+        ChatSocket.Message.addText(data.content, date, '');
+    } else {
+        ChatSocket.Message.addImage(data.content, date, '');
+    }
 });
 
 socket.on("set-all-friends", function (friends) {
