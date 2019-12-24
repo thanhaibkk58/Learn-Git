@@ -1,13 +1,15 @@
 var express = require("express");
 var router = express.Router();
 var path = require("path");
+var mongoose = require("mongoose");
 
 /* ---------------------------------------------------- */
 /* POST - Upload a file */
 router.post("/upload", function (req, res) {
     if (!req.files) return res.status(400).json({Err: "File: " + req.files.image});
     var image = req.files.image;
-    var idImage = req.user._id;
+    // var idImage = req.user._id;
+    var idImage = new mongoose.Types.ObjectId;
     var url = "public/images/" + idImage + ".jpg";
 
     image.mv(url, function(err) {

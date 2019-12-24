@@ -168,6 +168,21 @@ $(document).on('submit', '.layout .content .chat .chat-footer form', function (e
     }
 });
 
+// Send image
+$("#input_image").change(function(){
+    $.ajax({
+        url: "/upload",
+        type: "post",
+        data: {image: $('#input_image').val()},
+        success: function (response) {
+            // window.location.replace("/");
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+        }
+    });
+});
+
 socket.on("get-all-sent-request", function (data) {
     var json = JSON.parse(data);
     let ul = document.getElementById("ul-sent-requests");
@@ -275,6 +290,36 @@ socket.on("set-all-friends", function (friends) {
         document.getElementById("profile_friend_firstname").innerHTML = list_friends[index].firstname;
         document.getElementById("profile_friend_lastname").innerHTML = list_friends[index].lastname;
     });
+});
+
+// Search Chats
+$('#input_search_chat').keyup(function(){
+
+    var that = this, $allListElements = $('#ul-list-friends > li');
+
+    var $matchingListElements = $allListElements.filter(function(i, li){
+        var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
+        return ~listItemText.indexOf(searchText);
+    });
+
+    $allListElements.hide();
+    $matchingListElements.show();
+
+});
+
+// Search all users
+$('#input_search_users').keyup(function(){
+
+    var that = this, $allListElements = $('#ul-all-users > li');
+
+    var $matchingListElements = $allListElements.filter(function(i, li){
+        var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
+        return ~listItemText.indexOf(searchText);
+    });
+
+    $allListElements.hide();
+    $matchingListElements.show();
+
 });
 
 
