@@ -4,6 +4,7 @@ var receiverID;
 var users_temp = [];
 var list_friends = [];
 var idUserSelected;
+var messages = [];
 
 var userID = document.getElementById("userID").value;
 
@@ -82,11 +83,12 @@ socket.on("set-all-request-friends", function (friends) {
     $('#ul-list-request-friends li').click(function () {
         var index = $(this).index();
         $('#profileModal').modal();
-        document.getElementById("fr_fullname").value = json[index].userID1.firstname + " " + json[index].userID1.lastname;
-        document.getElementById("fr_email").value = json[index].userID1.email;
-        document.getElementById("fr_sex").value = json[index].userID1.sex;
-        document.getElementById("fr_avatar").src = json[index].userID1.avatar_url;
-        console.log("URL: " + json[index].userID1.avatar_url);
+        document.getElementById("user_fullname").innerHTML = json[index].userID1.firstname + " " + json[index].userID1.lastname;
+        document.getElementById("user_email").innerHTML = json[index].userID1.email;
+        document.getElementById("user_firstname").innerHTML = json[index].userID1.firstname;
+        document.getElementById("user_lastname").innerHTML = json[index].userID1.lastname;
+        document.getElementById("user_sex").innerHTML = json[index].userID1.sex;
+        document.getElementById("user_avatar").src = json[index].userID1.avatar_url;
     });
 
     $('#ul-list-request-friends li button').click(function (event) {
@@ -131,9 +133,12 @@ socket.on("get-all-users", function (data) {
     $('#ul-all-users li').click(function () {
         var index = $(this).index();
         $('#profileModal').modal();
-        document.getElementById("fr_fullname").value = json[index].firstname + " " + json[index].lastname;
-        document.getElementById("fr_email").value = json[index].email;
-        document.getElementById("fr_sex").value = json[index].sex;
+        document.getElementById("user_fullname").innerHTML = json[index].firstname + " " + json[index].lastname;
+        document.getElementById("user_email").innerHTML = json[index].email;
+        document.getElementById("user_firstname").innerHTML = json[index].firstname;
+        document.getElementById("user_lastname").innerHTML = json[index].lastname;
+        document.getElementById("user_sex").innerHTML = json[index].sex;
+        document.getElementById("user_avatar").src = json[index].avatar_url;
     });
 
     $('#ul-all-users li button').click(function (event) {
@@ -236,9 +241,12 @@ socket.on("get-all-sent-request", function (data) {
     $('#ul-sent-requests li').click(function () {
         var index = $(this).index();
         $('#profileModal').modal();
-        document.getElementById("fr_fullname").value = json[index].userID2.firstname + " " + json[index].userID2.lastname;
-        document.getElementById("fr_email").value = json[index].userID2.email;
-        document.getElementById("fr_sex").value = json[index].userID2.sex;
+        document.getElementById("user_fullname").innerHTML = json[index].userID2.firstname + " " + json[index].userID2.lastname;
+        document.getElementById("user_email").innerHTML = json[index].userID2.email;
+        document.getElementById("user_firstname").innerHTML = json[index].userID2.firstname;
+        document.getElementById("user_lastname").innerHTML = json[index].userID2.lastname;
+        document.getElementById("user_sex").innerHTML = json[index].userID2.sex;
+        document.getElementById("user_avatar").src = json[index].userID2.avatar_url;
     });
 
     $('#ul-sent-requests li button').click(function (event) {
@@ -312,7 +320,7 @@ socket.on("set-all-friends", function (friends) {
 
     $('#ul-list-friends li').click(function () {
         $('.layout .content .chat .chat-body .messages').empty();
-        var index = $(this).index() - 1;
+        var index = $(this).index();
         room_id = json[index]._id;
         idUserSelected = list_friends[index]._id;
 
@@ -370,6 +378,6 @@ function formatDate(date) {
     var day = date.getDay();
     var month = date.getMonth();
     var year = date.getFullYear();
-    var strTime = hours + ':' + minutes + ' ' + ampm + '  ' + day + '/' + month + '/' + year + ' ';
+    var strTime = hours + ':' + minutes + ' ' + ampm + '  ';
     return strTime;
 }
