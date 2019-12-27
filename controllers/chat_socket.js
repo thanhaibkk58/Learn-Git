@@ -23,6 +23,8 @@ module.exports.sockets = function (http) {
         socket.on("set-info-user", function (user_id) {
             userID = user_id.trim();
             console.error(userID + " is logged in!");
+            //
+            socket.join(user_id);
 
             friends_controller.getAllFriends(userID, function (err, friends) {
                 if (err) console.error(err);
@@ -50,15 +52,21 @@ module.exports.sockets = function (http) {
         });
 
         socket.on("confirm-request-friend", function (id_request) {
-            friends_controller.acceptFriend(id_request, userID, function (result) {
-                // Do something
+            friends_controller.acceptFriend(id_request, userID, function (err, result) {
+                if (err) console.error(err);
+                socket.broadcast.to(id_request).emit('noti-confirm-request-friend', result);
+                friends_controller.getAllFriends(userID, function (err, friends) {
+                    if (err) console.error(err);
+                    socket.emit("set-all-friends", JSON.stringify(friends));
+                });
             });
         });
 
         socket.on("event-add-friend", function (data) {
             friends_controller.addFriend(userID, data, function (err, result) {
                 if (err) console.error(err);
-                // Do something
+                socket.join(data);
+                socket.broadcast.to(data).emit('noti-sent-request-friend', result);
             })
         });
 

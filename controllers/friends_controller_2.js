@@ -44,7 +44,7 @@ function acceptFriend(userID1, userID2, callback){
         status: true
     };
 
-    Friend.findOneAndUpdate(filter, update, function (err, result) {
+    Friend.findOneAndUpdate(filter, update).populate("userID2").exec(function (err, result) {
         if (err) callback(err, null);
         callback(null, result);
     });
@@ -94,9 +94,12 @@ function addFriend(userID1, userID2, callback){
         created_at: Date.now()
     });
 
-    Friend.create(friend, function (err, result) {
+    Friend.create(friend, function (err, friend) {
         if (err) callback(err, null);
-        callback(null, result);
+        Friend.populate(friend, {path:"userID1"}, function (err, result){
+            if (err) callback(err, null);
+            callback(null, result);
+        });
     });
 }
 
