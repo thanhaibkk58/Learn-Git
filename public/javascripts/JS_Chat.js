@@ -58,6 +58,7 @@ document.getElementById("customFile").onchange = function () {
 socket.on("set-all-request-friends", function (friends) {
     var json = JSON.parse(friends);
     let ul = document.getElementById("ul-list-request-friends");
+    $('#ul-list-request-friends').empty();
     for (var i = 0; i < json.length; i++) {
         var friend = json[i].userID1;
         users_temp.push(friend._id);
@@ -105,6 +106,18 @@ socket.on("set-all-request-friends", function (friends) {
             $(this).parent().html("&#10004; Deleted");
         }
     });
+});
+
+// Noti: confirm friend
+socket.on("noti-confirm-request-friend", function (data) {
+    socket.emit("set-info-user", userID);
+    alert(data.userID2.firstname + " " + data.userID2.lastname + " accepted your friend request!");
+});
+
+// Noti: send request
+socket.on("noti-sent-request-friend", function (data) {
+    socket.emit("set-info-user", userID);
+    alert(data.userID1.firstname + " " + data.userID1.lastname + " sent request friend!");
 });
 
 socket.on("get-all-users", function (data) {
@@ -217,6 +230,7 @@ $("#input_image").change(function(){
 socket.on("get-all-sent-request", function (data) {
     var json = JSON.parse(data);
     let ul = document.getElementById("ul-sent-requests");
+    $('#ul-sent-requests').empty();
     for (var i = 0; i < json.length; i++) {
         var friend = json[i].userID2;
         users_temp.push(friend._id);
@@ -293,7 +307,8 @@ socket.on("emit-message-to-receiver", function (data) {
 socket.on("set-all-friends", function (friends) {
     var json = JSON.parse(friends);
     var ul_list_friends = document.getElementById("ul-list-friends");
-    // $('#ul-list-friends').empty();
+    $('#ul-list-friends').empty();
+    list_friends = [];
 
     for (var i = 0; i < json.length; i++) {
         let friend;
