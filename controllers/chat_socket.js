@@ -6,6 +6,7 @@ var checkAuthentication = require("../utils/check_authentication");
 
 var friends_controller = require("../controllers/friends_controller_2");
 var messages_controller = require("../controllers/messages_controller_2");
+var conversations_controller = require("../controllers/conversations_controller_2");
 
 var User = require("../models/user");
 var Message = require("../models/message");
@@ -29,6 +30,11 @@ module.exports.sockets = function (http) {
             friends_controller.getAllFriends(userID, function (err, friends) {
                 if (err) console.error(err);
                 socket.emit("set-all-friends", JSON.stringify(friends));
+            });
+
+            conversations_controller.getAllConversations(user_id, function (err, conversations) {
+                if (err) console.error(err);
+                socket.emit("set-all-groups", JSON.stringify(conversations));
             });
 
             friends_controller.getAllRequestFriends(userID, function (err, requests) {
@@ -103,6 +109,21 @@ module.exports.sockets = function (http) {
                 socket.broadcast.to(currentRoom).emit('emit-message-to-receiver', mess);
             });
 
+        });
+
+        socket.on("event-create-group-chat", function (data) {
+            var conversation = new Conversation({
+                name: data.name,
+                participants: data.participants,
+                description: data.description,
+                created_by: data.created_by
+            });
+
+            conversations_controller.createConversation(conversation, function (err, result) {
+                if (err) console.error(err);
+                console.error(result);
+                socket.emit
+            });
         });
     });
 };

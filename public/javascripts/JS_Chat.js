@@ -7,6 +7,7 @@ var idUserSelected;
 var messages = [];
 
 var userID = document.getElementById("userID").value;
+var my_firstname = document.getElementById("firstname").value;
 
 socket.on("connect", function () {
     socket.emit("set-info-user", userID);
@@ -14,14 +15,14 @@ socket.on("connect", function () {
 
 var ChatSocket = {
     Message: {
-        addText: function (message, time, type) {
+        addText: function (message, time, type, firstname) {
             var chat_body = $('.layout .content .chat .chat-body');
             if (chat_body.length > 0) {
 
                 type = type ? type : '';
                 message = message ? message : 'Null';
 
-                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-content">' + message + '</div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
+                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div class="message-content">' + message + '</div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -32,14 +33,14 @@ var ChatSocket = {
         },
 
         // Test add image:
-        addImage: function (message, time, type) {
+        addImage: function (message, time, type, firstname) {
             var chat_body = $('.layout .content .chat .chat-body');
             if (chat_body.length > 0) {
 
                 type = type ? type : '';
                 message = message ? message : 'Null';
 
-                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><img class="message-content" style="width:360px;" src="' + message + '" ></img><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
+                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><img class="message-content" style="width:360px;" src="' + message + '" ></img><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -173,7 +174,7 @@ $('#btn_delete_friend').click(function () {
         success: function (response) {
             window.location.replace("/");
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        error: function (jqXHR, textStatus, errorThrown) {
             console.log(textStatus, errorThrown);
         }
     });
@@ -196,7 +197,7 @@ $(document).on('submit', '.layout .content .chat .chat-footer form', function (e
 
     if (message) {
         console.log(new Date());
-        ChatSocket.Message.addText(message, formatDate(new Date()), 'outgoing-message');
+        ChatSocket.Message.addText(message, formatDate(new Date()), 'outgoing-message', my_firstname);
         input.val('');
         socket.emit("send-message-to-server", {message: message, userID: userID, type: "text", toUser: idUserSelected});
     } else {
@@ -205,7 +206,7 @@ $(document).on('submit', '.layout .content .chat .chat-footer form', function (e
 });
 
 // Send image
-$("#input_image").change(function(){
+$("#input_image").change(function () {
 
     var data = new FormData();
     data.append('image', document.getElementById('input_image').files[0]);
@@ -218,10 +219,15 @@ $("#input_image").change(function(){
         data: data,
         success: function (response) {
             console.log(response);
-            ChatSocket.Message.addImage(response.url, formatDate(new Date()), 'outgoing-message');
-            socket.emit("send-message-to-server", {message: response.url, userID: userID, type: "image", toUser: idUserSelected});
+            ChatSocket.Message.addImage(response.url, formatDate(new Date()), 'outgoing-message', my_firstname);
+            socket.emit("send-message-to-server", {
+                message: response.url,
+                userID: userID,
+                type: "image",
+                toUser: idUserSelected
+            });
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        error: function (jqXHR, textStatus, errorThrown) {
             console.log(textStatus, errorThrown);
         }
     });
@@ -280,16 +286,16 @@ socket.on("get-old-messages", function (json_data) {
         var date = formatDate(new Date(data[i].created_at));
 
         if (data[i].sender._id === userID) {
-            if (data[i].type === "text"){
-                ChatSocket.Message.addText(message, date, 'outgoing-message');
+            if (data[i].type === "text") {
+                ChatSocket.Message.addText(message, date, 'outgoing-message', data[i].sender.firstname);
             } else {
-                ChatSocket.Message.addImage(message, date, 'outgoing-message');
+                ChatSocket.Message.addImage(message, date, 'outgoing-message', data[i].sender.firstname);
             }
         } else {
             if (data[i].type === "text") {
-                ChatSocket.Message.addText(message, date, '');
+                ChatSocket.Message.addText(message, date, '', data[i].sender.firstname);
             } else {
-                ChatSocket.Message.addImage(message, date, '');
+                ChatSocket.Message.addImage(message, date, '', data[i].sender.firstname);
             }
         }
     }
@@ -297,10 +303,10 @@ socket.on("get-old-messages", function (json_data) {
 
 socket.on("emit-message-to-receiver", function (data) {
     var date = formatDate(new Date(data.created_at));
-    if (data.type === "text"){
-        ChatSocket.Message.addText(data.content, date, '');
+    if (data.type === "text") {
+        ChatSocket.Message.addText(data.content, date, '', data.sender.firstname);
     } else {
-        ChatSocket.Message.addImage(data.content, date, '');
+        ChatSocket.Message.addImage(data.content, date, '', data.sender.firstname);
     }
 });
 
@@ -308,6 +314,7 @@ socket.on("set-all-friends", function (friends) {
     var json = JSON.parse(friends);
     var ul_list_friends = document.getElementById("ul-list-friends");
     $('#ul-list-friends').empty();
+    $('#ul_list_friends_groupchat').empty();
     list_friends = [];
 
     for (var i = 0; i < json.length; i++) {
@@ -318,6 +325,7 @@ socket.on("set-all-friends", function (friends) {
             friend = json[i].userID2
         }
         users_temp.push(friend._id);
+        // For list chat
         let li_list_friends = document.createElement("li");
         li_list_friends.className = "list-group-item";
         li_list_friends.innerHTML = "" +
@@ -330,6 +338,16 @@ socket.on("set-all-friends", function (friends) {
             "                            </div>"
 
         ul_list_friends.appendChild(li_list_friends);
+
+        // For group chat
+        var ul_list_friends_groupchat = document.getElementById("ul_list_friends_groupchat");
+        let li_list_friends_group = document.createElement("li");
+        li_list_friends_group.className = "list-group-item";
+        li_list_friends_group.innerHTML = "<div class=\"custom-control custom-checkbox\">\n" +
+            "                                <input type=\"checkbox\" class=\"custom-control-input\">\n" +
+            "                                <label class=\"custom-control-label\">" + friend.firstname + " " + friend.lastname + "</label>\n" +
+            "                            </div>";
+        ul_list_friends_groupchat.appendChild(li_list_friends_group);
         list_friends.push(friend);
     }
 
@@ -340,7 +358,7 @@ socket.on("set-all-friends", function (friends) {
         idUserSelected = list_friends[index]._id;
 
         socket.emit("join-room", {userID: userID, room_id: room_id});
-
+        $('#div_profile_friend').show();
         document.getElementById("fr_chat_fullname").innerHTML = list_friends[index].firstname + " " + list_friends[index].lastname;
         document.getElementById("fr_chat_avatar").src = list_friends[index].avatar_url;
 
@@ -350,14 +368,99 @@ socket.on("set-all-friends", function (friends) {
         document.getElementById("profile_friend_firstname").innerHTML = list_friends[index].firstname;
         document.getElementById("profile_friend_lastname").innerHTML = list_friends[index].lastname;
     });
+
+    // Select friend (Group chat)
+    $('#ul_list_friends_groupchat li').click(function (event) {
+        var checkbox = $(this).find("input[type='checkbox']");
+        if (checkbox.is(':checked')) {
+            checkbox.prop('checked', false);
+        } else {
+            checkbox.prop('checked', true);
+        }
+    });
+
+    // Event create group chat
+    $('#btn_create_group_chat').click(function () {
+        var name = $('#group_name').val();
+        var description = $('#description').val();
+        var created_by = userID.trim();
+        var participants = [];
+        participants.push(userID);
+        $('#ul_list_friends_groupchat').find("input:checkbox:checked").each(function () {
+            var index = $(this).parent().parent().index();
+            participants.push(list_friends[index]._id);
+            $(this).prop('checked', false);
+        });
+        var data = {
+            name: name,
+            description: description,
+            created_by: created_by,
+            participants: participants
+        };
+
+        socket.emit("event-create-group-chat", data);
+        $("#newGroup").modal('hide');
+    });
+});
+
+// All groups
+socket.on("set-all-groups", function (data) {
+    var groups = JSON.parse(data);
+    var ul_list_groups = document.getElementById("ul-list-groups");
+    $('#ul_list_groups').empty();
+
+    for (var i = 0; i < groups.length; i++) {
+        let li_group = document.createElement("li");
+        li_group.className = "list-group-item";
+        li_group.innerHTML = "" +
+            "                            <figure class=\"avatar\">\n" +
+            "                                <img src=\" " + groups[i].avatar_url + "\" class=\"rounded-circle\">\n" +
+            "                            </figure>\n" +
+            "                            <div class=\"users-list-body\">\n" +
+            "                                <h5>Group: " + groups[i].name + "</h5>\n" +
+            "                                <p>Click me....</p>\n" +
+            "                            </div>"
+
+        ul_list_groups.appendChild(li_group);
+    }
+
+    $('#ul-list-groups li').click(function () {
+        $('.layout .content .chat .chat-body .messages').empty();
+        var index = $(this).index();
+        // idUserSelected = json[index]._id;
+        socket.emit("join-room", {userID: userID, room_id: groups[index]._id});
+
+        document.getElementById("fr_chat_fullname").innerHTML = "Group: " + groups[index].name;
+        document.getElementById("fr_chat_avatar").src = groups[index].avatar_url;
+
+        document.getElementById("profile_friend_fullname").innerHTML = "Group: " + groups[index].name;
+        document.getElementById("profile_friend_avt").src = groups[index].avatar_url;
+
+        $('#div_profile_friend').hide();
+    });
 });
 
 // Search Chats
-$('#input_search_chat').keyup(function(){
+$('#input_search_chat').keyup(function () {
 
     var that = this, $allListElements = $('#ul-list-friends > li');
 
-    var $matchingListElements = $allListElements.filter(function(i, li){
+    var $matchingListElements = $allListElements.filter(function (i, li) {
+        var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
+        return ~listItemText.indexOf(searchText);
+    });
+
+    $allListElements.hide();
+    $matchingListElements.show();
+
+});
+
+// Search friends in group chat
+$('#input_search_friends').keyup(function () {
+
+    var that = this, $allListElements = $('#ul_list_friends_groupchat > li');
+
+    var $matchingListElements = $allListElements.filter(function (i, li) {
         var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
         return ~listItemText.indexOf(searchText);
     });
@@ -368,11 +471,11 @@ $('#input_search_chat').keyup(function(){
 });
 
 // Search all users
-$('#input_search_users').keyup(function(){
+$('#input_search_users').keyup(function () {
 
     var that = this, $allListElements = $('#ul-all-users > li');
 
-    var $matchingListElements = $allListElements.filter(function(i, li){
+    var $matchingListElements = $allListElements.filter(function (i, li) {
         var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
         return ~listItemText.indexOf(searchText);
     });
