@@ -73,6 +73,50 @@
 </div>
 <!-- ./ disconnected modal -->
 
+<!-- new group modal -->
+<div class="modal fade" id="newGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-users"></i> New Group
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="group_name" class="col-form-label">Group name</label>
+                        <input type="text" class="form-control" id="group_name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="users" class="col-form-label">Find friends</label>
+                        <input type="text" class="form-control" placeholder="Search ..." id="input_search_friends">
+                    </div>
+
+                    <ul class="list-group list-group-flush" style="height: 200px; overflow: scroll; overflow-x: hidden;"
+                        id="ul_list_friends_groupchat">
+                        <!-- List friends (Group chat) -->
+                    </ul>
+
+                    <div class="form-group">
+                        <label for="description" class="col-form-label">Description</label>
+                        <textarea class="form-control" id="description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btn_create_group_chat" type="button" class="btn btn-primary">Create Group</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ new group modal -->
+
 <!-- edit profile modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
@@ -123,7 +167,7 @@
                                             <i class="ti-user"></i>
                                         </span>
                                     </div>
-                                    <input type="text" class="form-control" id="fullname" name="firstname"
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
                                            value="<%= user.firstname %>">
                                 </div>
                             </div>
@@ -149,7 +193,8 @@
                                         </figure>
                                     </div>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="customFile" name="image" accept=".png, .jpg, .jpeg, .gif"
+                                        <input type="file" class="custom-file-input" id="customFile" name="image"
+                                               accept=".png, .jpg, .jpeg, .gif"
                                                enctype="multipart/form-data">
                                         <label class="custom-file-label" for="customFile" id="label_choose_image">Choose
                                             file</label>
@@ -208,7 +253,8 @@
                             <div class="sidebar-body">
                                 <div class="pl-4 pr-4 text-center">
                                     <figure class="avatar avatar-xl mb-4">
-                                        <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg" id="user_avatar" class="rounded-circle">
+                                        <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg"
+                                             id="user_avatar" class="rounded-circle">
                                     </figure>
                                     <h5 class="text-primary" id="user_fullname">Fullname</h5>
                                 </div>
@@ -353,6 +399,10 @@
                     <input id="input_search_chat" type="text" class="form-control" placeholder="Search Chats">
                 </form>
                 <div class="sidebar-body">
+                    <ul class="list-group list-group-flush" id="ul-list-groups">
+                        <!-- List Groups -->
+                    </ul>
+
                     <ul class="list-group list-group-flush" id="ul-list-friends">
                         <!-- List Chats -->
                     </ul>
@@ -410,7 +460,8 @@
             <div class="chat-header">
                 <div class="chat-header-user">
                     <figure class="avatar avatar-lg">
-                        <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg" id="fr_chat_avatar" class="rounded-circle">
+                        <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg" id="fr_chat_avatar"
+                             class="rounded-circle">
                     </figure>
                     <div>
                         <h5 id="fr_chat_fullname">Fullname</h5>
@@ -432,11 +483,12 @@
                     <input type="text" class="form-control" placeholder="Type a message ..."
                            aria-label="Type a message ..." aria-describedby="button-addon2">
                     <div class="form-buttons">
-                        <input type="file" style="opacity: 0" class="btn btn-light btn-floating" id="input_image" accept=".png, .jpg, .jpeg, .gif">
+                        <input type="file" style="opacity: 0" class="btn btn-light btn-floating" id="input_image"
+                               accept=".png, .jpg, .jpeg, .gif">
                         <label for="input_image" class="btn btn-light btn-floating"><i class="fa fa-image"></i></label>
-<!--                        <button class="btn btn-light btn-floating" type="button">-->
-<!--                            <i class="fa fa-image"></i>-->
-<!--                        </button>-->
+                        <!--                        <button class="btn btn-light btn-floating" type="button">-->
+                        <!--                            <i class="fa fa-image"></i>-->
+                        <!--                        </button>-->
                         <button class="btn btn-light btn-floating" type="button">
                             <i class="fa fa-smile-o"></i>
                         </button>
@@ -457,46 +509,63 @@
                 <div class="sidebar-body">
                     <div class="pl-4 pr-4 text-center">
                         <figure class="avatar avatar-xl mb-4">
-                            <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg" id="profile_friend_avt" class="rounded-circle">
+                            <img src="https://www.vasjamaica.com/sites/default/files/fb_avatar_0_0.jpg"
+                                 id="profile_friend_avt" class="rounded-circle">
                         </figure>
                         <h5 class="text-primary" id="profile_friend_fullname">Fullname</h5>
                     </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>Email</h6>
-                        <p class="text-muted" id="profile_friend_email">example@gmail.com</p>
+                    <div id="div_profile_friend">
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Email</h6>
+                            <p class="text-muted" id="profile_friend_email">example@gmail.com</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>First name</h6>
+                            <p class="text-muted" id="profile_friend_firstname">Tên</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Last name</h6>
+                            <p class="text-muted" id="profile_friend_lastname">Họ Đệm</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Sex</h6>
+                            <p class="text-muted" id="profile_friend_sex">None</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>City</h6>
+                            <p class="text-muted">TP. Hà Nội</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Phone number</h6>
+                            <p class="text-muted">+84 366 675 787</p>
+                        </div>
+                        <hr>
+                        <div class="form-group text-xl-center">
+                            <button id="btn_delete_friend" type="button" class="btn btn-outline-danger btn-block">Delete
+                                Friend
+                            </button>
+                        </div>
                     </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>First name</h6>
-                        <p class="text-muted" id="profile_friend_firstname">Tên</p>
+
+                    <div id="div_info_group">
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Description</h6>
+                            <p class="text-muted">I love reading, traveling and discovering new things. You need to be
+                                happy in life.</p>
+                        </div>
+                        <hr>
+                        <ul class="list-group list-group-flush">
+                            <!-- Add member -->
+                        </ul>
                     </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>Last name</h6>
-                        <p class="text-muted" id="profile_friend_lastname">Họ Đệm</p>
-                    </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>Sex</h6>
-                        <p class="text-muted" id="profile_friend_sex">None</p>
-                    </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>City</h6>
-                        <p class="text-muted">TP. Hà Nội</p>
-                    </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>Phone number</h6>
-                        <p class="text-muted">+84 366 675 787</p>
-                    </div>
-                    <hr>
-                    <div class="form-group text-xl-center">
-                        <button id="btn_delete_friend" type="button" class="btn btn-outline-danger btn-block">Delete
-                            Friend
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </div>

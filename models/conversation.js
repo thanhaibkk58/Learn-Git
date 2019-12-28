@@ -13,6 +13,13 @@ var conversationSchema = new Schema({
         default: [],
         ref: "User"
     }],
+    avatar_url: {
+        type: String,
+        default: "https://localhop-prod.s3.amazonaws.com/uploads/1fd8c13703d95609fed6f779b59f41cb_meeting-icon-png-presentation-icon-board-meeting-icon-meeting-icon--4.png"
+    },
+    description: {
+        type: String
+    },
     created_by: {
         type: Schema.Types.ObjectId,
         required: true,
