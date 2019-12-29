@@ -1,104 +1,114 @@
-var express = require("express");
-var router = express.Router();
-var mongoose = require("mongoose");
 var Friend = require("../models/friends.js");
-var passport = require("passport");
+var  User = require("../models/user");
 
-var checkAuthentication = require("../utils/check_authentication");
-
-/* ---------------------------------------------------- */
-/* POST - Add Friend */
-router.post("/add_friend", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    var friend = new Friend({
-        userID1: req.user._id,
-        userID2: req.body.userID2,
-    });
-
-    Friend.create(friend, function (err, result) {
-        if (err) return res.status(500);
-        res.status(200).send(result);
-    });
-});
-
-/* ---------------------------------------------------- */
-/* POST - Accept friend */
-router.put("/accept", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    var filter = {
-        userID1: req.body.userID1,
-        status: false
-        // userID2: req.user.userID
-    };
-
-    var update = {
-        status: true
-    };
-    Friend.findOneAndUpdate(filter, update, {new: true}, function (err, result) {
-        if (err) console.error("Loi truy van");
-        res.json(result);
-    });
-});
-
-/* ---------------------------------------------------- */
-/* DELETE - Delete friend */
-router.post("/delete_friend", checkAuthentication, function(req, res){
-    if (!req.body) return res.status(400);
+function getAllFriends(userID, callback) {
     var filter = {
         $or: [
             {
-                userID1: req.body.userID1,
-                userID2: req.user._id
-            },
-            {
-                userID1: req.user._id,
-                userID2: req.body.userID1
-            }
-        ]
-    };
-
-    Friend.findOneAndDelete(filter, function (err, result) {
-        if (err) return res.status(400);
-        res.json(result);
-    });
-});
-
-/* ---------------------------------------------------- */
-/* GET - Get all friends */
-router.get("/all_friends", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    var filter = {
-        $or: [
-            {
-                userID1: req.user._id,
+                userID1: userID,
                 status: true
             },
             {
-                userID2: req.user._id,
+                userID2: userID,
                 status: true
             }
         ]
     };
 
     Friend.find(filter).populate("userID1").populate("userID2").exec(function (err, friends) {
-        if (err) console.error(err);
-        res.json(friends);
+        if (err) callback(err, null);
+        callback(null, friends);
     });
-});
 
-/* ---------------------------------------------------- */
-/* GET - Get friend requests */
-router.get("/friend_requests", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
+}
+
+function getAllRequestFriends(userID, callback){
     var filter = {
-        status: false,
-        userID2: req.body.userID
+        userID2: userID,
+        status: false
     };
-    Friend.find(filter, function (err, result) {
-        if (err) return res.status(400);
-        res.json(result);
+
+    Friend.find(filter).populate("userID1").exec(function (err, friends) {
+        if (err) callback(err, null);
+        callback(null, friends);
     });
-});
+}
 
+function acceptFriend(userID1, userID2, callback){
+    var filter = {
+        userID1: userID1,
+        userID2: userID2,
+        status: false
+    };
+    var update = {
+        status: true
+    };
 
-module.exports = router;
+    Friend.findOneAndUpdate(filter, update).populate("userID2").exec(function (err, result) {
+        if (err) callback(err, null);
+        callback(null, result);
+    });
+}
+
+function deleteRequest(userID1, userID2, callback){
+    var filter = {
+        userID1: userID1,
+        userID2: userID2,
+        status: false
+    };
+    Friend.findOneAndDelete(filter, function (err, result) {
+        if (err) callback(err, null);
+        callback(null, result)
+    });
+}
+
+function deleteFriend(userID1, userID2, callback){
+    var filter = {
+        userID1: userID1,
+        userID2: userID2,
+        status: true
+    };
+    Friend.findOneAndDelete(filter, function (err, result) {
+        if (err) callback(err, null);
+        callback(null, result)
+    });
+}
+
+function getAllSentRequests(userID, callback){
+    var filter = {
+        userID1: userID,
+        status: false
+    };
+
+    Friend.find(filter).populate("userID2").exec(function (err, results) {
+        if (err) callback(err, null);
+        callback(null, results);
+    });
+}
+
+function addFriend(userID1, userID2, callback){
+    var friend = new Friend({
+        userID1: userID1,
+        userID2: userID2,
+        status: false,
+        created_at: Date.now()
+    });
+
+    Friend.create(friend, function (err, friend) {
+        if (err) callback(err, null);
+        Friend.populate(friend, {path:"userID1"}, function (err, result){
+            if (err) callback(err, null);
+            callback(null, result);
+        });
+    });
+}
+
+module.exports = {
+    getAllFriends,
+    getAllRequestFriends,
+    acceptFriend,
+    deleteRequest,
+    getAllSentRequests,
+    deleteFriend,
+    addFriend
+};

@@ -5,6 +5,7 @@ var users_temp = [];
 var list_friends = [];
 var idUserSelected;
 var messages = [];
+var idConversationSelected;
 
 var userID = document.getElementById("userID").value;
 var my_firstname = document.getElementById("firstname").value;
@@ -358,6 +359,7 @@ socket.on("set-all-friends", function (friends) {
         idUserSelected = list_friends[index]._id;
 
         socket.emit("join-room", {userID: userID, room_id: room_id});
+        $('#div_info_group').hide();
         $('#div_profile_friend').show();
         document.getElementById("fr_chat_fullname").innerHTML = list_friends[index].firstname + " " + list_friends[index].lastname;
         document.getElementById("fr_chat_avatar").src = list_friends[index].avatar_url;
@@ -427,17 +429,41 @@ socket.on("set-all-groups", function (data) {
     $('#ul-list-groups li').click(function () {
         $('.layout .content .chat .chat-body .messages').empty();
         var index = $(this).index();
-        // idUserSelected = json[index]._id;
+        $('#div_info_group').show();
+        idConversationSelected = groups[index]._id;
         socket.emit("join-room", {userID: userID, room_id: groups[index]._id});
 
         document.getElementById("fr_chat_fullname").innerHTML = "Group: " + groups[index].name;
         document.getElementById("fr_chat_avatar").src = groups[index].avatar_url;
 
         document.getElementById("profile_friend_fullname").innerHTML = "Group: " + groups[index].name;
+        document.getElementById("info_group_description").innerHTML = groups[index].description;
         document.getElementById("profile_friend_avt").src = groups[index].avatar_url;
 
         $('#div_profile_friend').hide();
+        var ul_list_members = document.getElementById("ul_list_members");
+        $('#ul_list_members').empty();
+
+        for (var i = 0; i < groups[index].participants.length; i++) {
+            let li_member = document.createElement("li");
+            li_member.className = "list-group-item";
+            li_member.innerHTML = "" +
+                "                            <figure class=\"avatar\">\n" +
+                "                                <img src=\" " + groups[index].participants[i].avatar_url + "\" class=\"rounded-circle\">\n" +
+                "                            </figure>\n" +
+                "                            <div class=\"users-list-body\">\n" +
+                "                                <h5>" + groups[index].participants[i].firstname + " " + groups[index].participants[i].lastname + "</h5>\n" +
+                "                                <p>Member</p>\n" +
+                "                            </div>"
+
+            ul_list_members.appendChild(li_member);
+        }
     });
+});
+
+// Delete conversation
+$('#btn_delete_group').click(function () {
+    socket.emit("event-delete-group", idConversationSelected);
 });
 
 // Search Chats
