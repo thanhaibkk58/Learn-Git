@@ -14,11 +14,9 @@ var express_fileupload = require("express-fileupload");
 var config = require("./utils/config");
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
-var users = require("./controllers/users_controller");
-var friends = require("./controllers/friends_controller");
-var uploadFile = require("./controllers/upload");
+var users = require("./routes/users");
+var friends = require("./routes/friends");
+var uploadFile = require("./routes/upload");
 
 var app = express();
 
@@ -65,7 +63,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express_fileupload());
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 app.use(users);
 app.use(friends);

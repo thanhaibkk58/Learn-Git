@@ -1,56 +1,34 @@
-var express = require("express");
-var router = express.Router();
-var Conversation = require("../models/conversation.js");
-var checkAuthentication = require("../utils/check_authentication");
+var Conversation = require("../models/conversation");
 
-function createConversation(type, name, created_by){
-    var conversation = new Conversation({
-        type: type,
-        name: name,
-        created_by: created_by,
-        created_at: Date.now()
-    });
-    Conversation.create(conversation, function (err, result) {
-        if (err) return null;
-        return result;
+function createConversation(conversation, callback) {
+    Conversation.create(conversation, function (err, data) {
+        if (err) callback(err, null);
+        Conversation.populate(data, {path:"created_by"}, function (err, result){
+            if (err) callback(err, null);
+            callback(null, result);
+        });
     });
 }
 
-/* ---------------------------------------------------- */
-/* POST - Create Conversation */
-router.post("/create_conversation", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    var conversation = new Conversation({
-        _id: new mongoose.Schema.ObjectID,
-        type: "group",
-        name: req.body.name,
-        created_by: req.user.userID,
-        created_at: Date.now()
+function getAllConversations(userID, callback){
+    Conversation.find({participants: userID}, function (err, result) {
+        if (err) callback(err, null);
+        Conversation.populate(result, {path:"participants"}, function (err, data){
+            if (err) callback(err, null);
+            callback(null, data);
+        });
     });
+}
 
-    Conversation.create(conversation, function (err, result) {
-        if (err) console.error("Loi truy van");
-        return json(result);
+function deleteConversation(id, callback){
+    Conversation.findByIdAndRemove({_id: id}, function (err, result) {
+        if (err) callback(err, null);
+        callback(null, result);
     });
-});
+}
 
-/* ---------------------------------------------------- */
-/* PUT - Update Conversation */
-router.put("/update_conversation", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    var conversation = new Conversation({
-        _id: new mongoose.Schema.ObjectID,
-        type: "group",
-        name: req.body.name,
-        created_by: req.user.userID,
-        created_at: Date.now()
-    });
-
-    Conversation.findByIdAndUpdate(conversation._id, conversation, function (err, result) {
-        if (err) console.error("Loi truy van");
-        return json(result);
-    });
-});
-
-
-module.exports = router;
+module.exports = {
+    createConversation,
+    getAllConversations,
+    deleteConversation
+};

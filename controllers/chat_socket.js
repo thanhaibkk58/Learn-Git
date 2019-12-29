@@ -4,9 +4,9 @@ var events = require("events");
 var eventEmitter = new events.EventEmitter();
 var checkAuthentication = require("../utils/check_authentication");
 
-var friends_controller = require("../controllers/friends_controller_2");
-var messages_controller = require("../controllers/messages_controller_2");
-var conversations_controller = require("../controllers/conversations_controller_2");
+var friends_controller = require("./friends_controller");
+var messages_controller = require("./messages_controller");
+var conversations_controller = require("./conversations_controller");
 
 var User = require("../models/user");
 var Message = require("../models/message");
@@ -121,9 +121,15 @@ module.exports.sockets = function (http) {
 
             conversations_controller.createConversation(conversation, function (err, result) {
                 if (err) console.error(err);
-                console.error(result);
-                socket.emit
+                // Thong bao cho thanh vien trong group
             });
         });
+
+        socket.on("event-delete-group", function (idConversationSelected) {
+            conversations_controller.deleteConversation(idConversationSelected, function (err, data) {
+                if (err) console.error(err);
+                // Thong bao cho thanh vien trong group
+            });
+        })
     });
 };

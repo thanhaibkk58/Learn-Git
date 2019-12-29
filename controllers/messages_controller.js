@@ -1,28 +1,32 @@
-var express = require("express");
-var router = express.Router();
-var mongoose = require("mongoose");
-var Message = require("../models/message.js");
+var Message = require("../models/message");
 
-var checkAuthentication = require("../utils/check_authentication");
-
-/* ---------------------------------------------------- */
-/* POST - Create Message */
-router.post("/create_message", checkAuthentication, function (req, res) {
-    if (!req.body) return res.status(400);
-    message = new Message({
-        _id: new mongoose.Schema.ObjectID,
-        content: req.body.content,
-        type: req.body.type,
-        conversationID: req.body.conversationID,
-        sender: req.user.userID,
-        created_at: Date.now()
-    });
-
+function createNewMessage(message, callback) {
     Message.create(message, function (err, result) {
-        if (err) console.error("Loi truy van");
-        return json(result);
+        if (err) callback(err, null);
+        Message.populate(result, {path:"sender"}, function (err, data){
+            if (err) callback(err, null);
+            callback(null, data);
+        });
     });
-});
+}
 
+function getAllPrivateMessage(roomID, callback){
+    var filter = {
+        receiver: roomID
+    };
 
-module.exports = router;
+    Message.find(filter).populate("sender").exec(function (err, data) {
+        if (err) callback(err, null);
+        callback(null, data);
+    });
+}
+
+function deleteMessage(){
+    return null;
+}
+
+module.exports = {
+    createNewMessage,
+    getAllPrivateMessage,
+    deleteMessage
+};
