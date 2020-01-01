@@ -104,7 +104,7 @@
 </div>
 <!-- ./ update group modal -->
 
-<!-- update group modal -->
+<!-- delete group modal -->
 <div class="modal fade" id="deleteGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
@@ -121,12 +121,36 @@
                 <p>Delete this group and all messages... You sure?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btn_confirm_delete_group">Continue</button>
+                <button type="button" class="btn btn-primary" id="btn_confirm_delete_group">Yes</button>
             </div>
         </div>
     </div>
 </div>
-<!-- ./ update group modal -->
+<!-- ./ delete group modal -->
+
+<!-- delete message modal -->
+<div class="modal fade" id="deleteMessage" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 30px">
+                <h6 class="modal-title">
+                    <i class="fa fa-users"></i> Delete Message
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Delete this message... You sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn_delete_message">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ delete message modal -->
 
 <!-- edit profile modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
