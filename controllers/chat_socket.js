@@ -100,9 +100,16 @@ module.exports.sockets = function (http) {
                 created_at: Date.now()
             });
             messages_controller.createNewMessage(message, function (err, mess) {
-                socket.broadcast.to(currentRoom).emit('emit-message-to-receiver', mess);
+                if (err) console.error(err);
+                io.to(currentRoom).emit('emit-message-to-receiver', mess);
             });
+        });
 
+        socket.on("event-delete-message", function (data) {
+            messages_controller.deleteMessage(data, function (err, result) {
+                if (err) console.error(err);
+                io.to(result.receiver).emit('emit-delete-message', result._id);
+            })
         });
 
         socket.on("event-create-group-chat", function (data) {

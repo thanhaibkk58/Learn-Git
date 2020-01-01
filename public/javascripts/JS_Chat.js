@@ -27,7 +27,7 @@ var ChatSocket = {
                 type = type ? type : '';
                 message = message ? message : 'Null';
 
-                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div class="message-content">' + message + '</div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
+                $('.layout .content .chat .chat-body .messages').append('<li style="list-style-type: none" class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div class="message-content">' + message + '</div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></li>');
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -45,7 +45,7 @@ var ChatSocket = {
                 type = type ? type : '';
                 message = message ? message : 'Null';
 
-                $('.layout .content .chat .chat-body .messages').append('<div class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><img class="message-content" style="width:360px;" src="' + message + '" ></img><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></div>');
+                $('.layout .content .chat .chat-body .messages').append('<li style="list-style-type: none" class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div><img class="message-content" style="width:360px;" src="' + message + '" ></img></div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></li>');
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -193,53 +193,6 @@ $(document).on('click', 'div.layout nav.navigation div.nav-group ul li.brackets'
     socket.emit("send-users-temp", users_temp);
 });
 
-// Send message
-$(document).on('submit', '.layout .content .chat .chat-footer form', function (e) {
-    e.preventDefault();
-
-    var input = $(this).find('input[type=text]');
-    var message = input.val();
-
-    message = $.trim(message);
-
-    if (message) {
-        console.log(new Date());
-        ChatSocket.Message.addText(message, formatDate(new Date()), 'outgoing-message', my_firstname);
-        input.val('');
-        socket.emit("send-message-to-server", {message: message, userID: userID, type: "text", toUser: idUserSelected});
-    } else {
-        input.focus();
-    }
-});
-
-// Send image
-$("#input_image").change(function () {
-
-    var data = new FormData();
-    data.append('image', document.getElementById('input_image').files[0]);
-
-    $.ajax({
-        url: "/upload",
-        type: "post",
-        processData: false, // important
-        contentType: false, // important
-        data: data,
-        success: function (response) {
-            console.log(response);
-            ChatSocket.Message.addImage(response.url, formatDate(new Date()), 'outgoing-message', my_firstname);
-            socket.emit("send-message-to-server", {
-                message: response.url,
-                userID: userID,
-                type: "image",
-                toUser: idUserSelected
-            });
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.log(textStatus, errorThrown);
-        }
-    });
-});
-
 socket.on("get-all-sent-request", function (data) {
     var json = JSON.parse(data);
     let ul = document.getElementById("ul-sent-requests");
@@ -287,6 +240,7 @@ socket.on("get-all-sent-request", function (data) {
 
 socket.on("get-old-messages", function (json_data) {
     var data = JSON.parse(json_data);
+    messages = data;
     var total_messages_me = 0;
     for (var i = 0; i < data.length; i++) {
         var message = data[i].content;
@@ -311,12 +265,87 @@ socket.on("get-old-messages", function (json_data) {
     document.getElementById("total_messages_group").innerHTML = "Sent: " + total_messages_me + "; Received: " + (data.length - total_messages_me) + "; Total: " + data.length;
 });
 
-socket.on("emit-message-to-receiver", function (data) {
-    var date = formatDate(new Date(data.created_at));
-    if (data.type === "text") {
-        ChatSocket.Message.addText(data.content, date, '', data.sender.firstname);
+var index_message;
+$('#ul_list_message').on('click', 'li', function (event) {
+    event.stopPropagation();
+    index_message = $(this).index();
+    console.log("index: "+ index_message);
+    $('#deleteMessage').modal('toggle');
+});
+
+$('#btn_delete_message').click(function () {
+    socket.emit("event-delete-message", messages[index_message]._id);
+    $('#deleteMessage').modal('hide');
+});
+
+socket.on("emit-delete-message", function (idMessage) {
+    for (var i = 0; i < messages.length; i++){
+        if (messages[i]._id === idMessage){
+            $('#ul_list_message li').eq(i).remove();
+            messages.splice(i, 1);
+        }
+    }
+});
+
+// Send message
+$(document).on('submit', '.layout .content .chat .chat-footer form', function (e) {
+    e.preventDefault();
+
+    var input = $(this).find('input[type=text]');
+    var message = input.val();
+
+    message = $.trim(message);
+
+    if (message) {
+        input.val('');
+        socket.emit("send-message-to-server", {message: message, userID: userID, type: "text", toUser: idUserSelected});
     } else {
-        ChatSocket.Message.addImage(data.content, date, '', data.sender.firstname);
+        input.focus();
+    }
+});
+
+// Send image
+$("#input_image").change(function () {
+
+    var data = new FormData();
+    data.append('image', document.getElementById('input_image').files[0]);
+
+    $.ajax({
+        url: "/upload",
+        type: "post",
+        processData: false, // important
+        contentType: false, // important
+        data: data,
+        success: function (response) {
+            socket.emit("send-message-to-server", {
+                message: response.url,
+                userID: userID,
+                type: "image",
+                toUser: idUserSelected
+            });
+            $("#input_image").val(null);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+        }
+    });
+});
+
+socket.on("emit-message-to-receiver", function (data) {
+    messages.push(data);
+    var date = formatDate(new Date(data.created_at));
+    if (data.sender._id === userID){
+        if (data.type === "text") {
+            ChatSocket.Message.addText(data.content, date, 'outgoing-message', data.sender.firstname);
+        } else {
+            ChatSocket.Message.addImage(data.content, date, 'outgoing-message', data.sender.firstname);
+        }
+    } else {
+        if (data.type === "text") {
+            ChatSocket.Message.addText(data.content, date, '', data.sender.firstname);
+        } else {
+            ChatSocket.Message.addImage(data.content, date, '', data.sender.firstname);
+        }
     }
 });
 
@@ -366,10 +395,9 @@ socket.on("set-all-friends", function (friends) {
         $('#tab_info').show();
         $('.layout .content .chat .chat-body .messages').empty();
         var index = $(this).index();
-        room_id = json[index]._id;
         idUserSelected = list_friends[index]._id;
 
-        socket.emit("join-room", {userID: userID, room_id: room_id});
+        socket.emit("join-room", {userID: userID, room_id: json[index]._id});
         $('#div_info_group').hide();
         $('#div_profile_friend').show();
         document.getElementById("fr_chat_fullname").innerHTML = list_friends[index].firstname + " " + list_friends[index].lastname;

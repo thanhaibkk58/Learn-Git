@@ -32,8 +32,17 @@ function deleteMessages(receiver, callback){
     });
 }
 
+// Delete a message
+function deleteMessage(id, callback){
+    Message.findByIdAndRemove({_id: id}, function (err, result) {
+        if (err) callback(err, null);
+        callback(null, result);
+    });
+}
+
 module.exports = {
     createNewMessage,
     getAllPrivateMessage,
-    deleteMessages
+    deleteMessages,
+    deleteMessage
 };
