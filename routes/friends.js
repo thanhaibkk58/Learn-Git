@@ -1,8 +1,8 @@
 var express = require("express");
 var router = express.Router();
-var mongoose = require("mongoose");
 var Friend = require("../models/friends.js");
-var passport = require("passport");
+var Message = require("../models/message.js");
+var messages_controller = require("../controllers/messages_controller");
 
 var checkAuthentication = require("../utils/check_authentication");
 
@@ -59,7 +59,10 @@ router.post("/delete_friend", checkAuthentication, function(req, res){
 
     Friend.findOneAndDelete(filter, function (err, result) {
         if (err) return res.status(400);
-        res.json(result);
+        messages_controller.deleteMessages(result._id, function (err, data) {
+            if (err) return res.status(400);
+            return res.json(data);
+        });
     });
 });
 

@@ -1,16 +1,20 @@
 var socket = io("/");
-var roomID;
-var receiverID;
 var users_temp = [];
 var list_friends = [];
+var list_members_update = [];
 var idUserSelected;
 var messages = [];
 var idConversationSelected;
+
+var index_group_selected;
+var list_groups;
 
 var userID = document.getElementById("userID").value;
 var my_firstname = document.getElementById("firstname").value;
 
 socket.on("connect", function () {
+    $('#tab_chat').hide();
+    $('#tab_info').hide();
     socket.emit("set-info-user", userID);
 });
 
@@ -98,13 +102,12 @@ socket.on("set-all-request-friends", function (friends) {
         var index_li = $(this).parent().parent().parent().index();
         var index_button = $(this).index();
         event.stopPropagation();
-        var id_request = json[index_li].userID1._id;
         if (index_button === 0) {
-            socket.emit("confirm-request-friend", id_request);
+            socket.emit("confirm-request-friend", {idFriend: json[index_li]._id, userID: userID});
             $(this).parent().html("&#10004; Done");
         }
         if (index_button === 1) {
-            socket.emit("delete-request-friend", id_request);
+            socket.emit("delete-request-friend", json[index_li]._id);
             $(this).parent().html("&#10004; Deleted");
         }
     });
@@ -118,8 +121,8 @@ socket.on("noti-confirm-request-friend", function (data) {
 
 // Noti: send request
 socket.on("noti-sent-request-friend", function (data) {
-    socket.emit("set-info-user", userID);
     alert(data.userID1.firstname + " " + data.userID1.lastname + " sent request friend!");
+    socket.emit("set-info-user", userID);
 });
 
 socket.on("get-all-users", function (data) {
@@ -159,8 +162,11 @@ socket.on("get-all-users", function (data) {
     $('#ul-all-users li button').click(function (event) {
         var index_li = $(this).parent().parent().parent().index();
         event.stopPropagation();
-        var userID2 = json[index_li]._id;
-        socket.emit("event-add-friend", userID2);
+        var data = {
+            userID1: userID,
+            userID2: json[index_li]._id
+        };
+        socket.emit("event-add-friend", data);
         $(this).hide();
         $(this).parent().html("&#10004; Sent Request");
     });
@@ -273,8 +279,7 @@ socket.on("get-all-sent-request", function (data) {
     $('#ul-sent-requests li button').click(function (event) {
         var index_li = $(this).parent().parent().parent().index();
         event.stopPropagation();
-        var userID2 = json[index_li].userID2._id;
-        socket.emit("cancel-request-friend", userID2);
+        socket.emit("cancel-request-friend", json[index_li]._id);
         $(this).hide();
         $(this).parent().html("&#10004; Request Cancelled");
     });
@@ -282,11 +287,13 @@ socket.on("get-all-sent-request", function (data) {
 
 socket.on("get-old-messages", function (json_data) {
     var data = JSON.parse(json_data);
+    var total_messages_me = 0;
     for (var i = 0; i < data.length; i++) {
         var message = data[i].content;
         var date = formatDate(new Date(data[i].created_at));
 
         if (data[i].sender._id === userID) {
+            total_messages_me += 1;
             if (data[i].type === "text") {
                 ChatSocket.Message.addText(message, date, 'outgoing-message', data[i].sender.firstname);
             } else {
@@ -300,6 +307,8 @@ socket.on("get-old-messages", function (json_data) {
             }
         }
     }
+    document.getElementById("total_messages").innerHTML = "Sent: " + total_messages_me + "; Received: " + (data.length - total_messages_me) + "; Total: " + data.length;
+    document.getElementById("total_messages_group").innerHTML = "Sent: " + total_messages_me + "; Received: " + (data.length - total_messages_me) + "; Total: " + data.length;
 });
 
 socket.on("emit-message-to-receiver", function (data) {
@@ -335,12 +344,12 @@ socket.on("set-all-friends", function (friends) {
             "                            </figure>\n" +
             "                            <div class=\"users-list-body\">\n" +
             "                                <h5>" + friend.firstname + " " + friend.lastname + "</h5>\n" +
-            "                                <p>Click me....</p>\n" +
+            "                                <p>Offline</p>\n" +
             "                            </div>"
 
         ul_list_friends.appendChild(li_list_friends);
 
-        // For group chat
+        // For create group chat
         var ul_list_friends_groupchat = document.getElementById("ul_list_friends_groupchat");
         let li_list_friends_group = document.createElement("li");
         li_list_friends_group.className = "list-group-item";
@@ -353,6 +362,8 @@ socket.on("set-all-friends", function (friends) {
     }
 
     $('#ul-list-friends li').click(function () {
+        $('#tab_chat').show();
+        $('#tab_info').show();
         $('.layout .content .chat .chat-body .messages').empty();
         var index = $(this).index();
         room_id = json[index]._id;
@@ -408,8 +419,9 @@ socket.on("set-all-friends", function (friends) {
 // All groups
 socket.on("set-all-groups", function (data) {
     var groups = JSON.parse(data);
+    list_groups = groups;
+    $('#ul-list-groups').empty();
     var ul_list_groups = document.getElementById("ul-list-groups");
-    $('#ul_list_groups').empty();
 
     for (var i = 0; i < groups.length; i++) {
         let li_group = document.createElement("li");
@@ -427,8 +439,11 @@ socket.on("set-all-groups", function (data) {
     }
 
     $('#ul-list-groups li').click(function () {
+        $('#tab_chat').show();
+        $('#tab_info').show();
         $('.layout .content .chat .chat-body .messages').empty();
         var index = $(this).index();
+        index_group_selected = index;
         $('#div_info_group').show();
         idConversationSelected = groups[index]._id;
         socket.emit("join-room", {userID: userID, room_id: groups[index]._id});
@@ -444,7 +459,11 @@ socket.on("set-all-groups", function (data) {
         var ul_list_members = document.getElementById("ul_list_members");
         $('#ul_list_members').empty();
 
+        var rule = "";
+        console.log(groups[index]);
         for (var i = 0; i < groups[index].participants.length; i++) {
+            if (i === 0) rule = "Admin";
+            else rule = "Member";
             let li_member = document.createElement("li");
             li_member.className = "list-group-item";
             li_member.innerHTML = "" +
@@ -453,23 +472,138 @@ socket.on("set-all-groups", function (data) {
                 "                            </figure>\n" +
                 "                            <div class=\"users-list-body\">\n" +
                 "                                <h5>" + groups[index].participants[i].firstname + " " + groups[index].participants[i].lastname + "</h5>\n" +
-                "                                <p>Member</p>\n" +
+                "                                <p>" + rule + "</p>\n" +
                 "                            </div>"
 
             ul_list_members.appendChild(li_member);
+
         }
     });
 });
 
+// Update group
+$('#btn_update_group').click(function () {
+    $('#updateGroup').modal('toggle');
+    $('#ul_list_friends_groupchat_update').empty();
+    list_members_update = [];
+    $('#group_name_update').val(list_groups[index_group_selected].name);
+    $('#description_update').val(list_groups[index_group_selected].description);
+    var ul_list_friends_groupchat_update = document.getElementById("ul_list_friends_groupchat_update");
+    var list_members_temp = list_groups[index_group_selected].participants;
+    for (var i = 0; i < list_friends.length; i++) {
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+
+        var length = list_members_temp.length;
+        var checked = false;
+        for (var j = 1; j < length; j++) {
+            if (list_friends[i]._id === list_members_temp[j]._id) {
+                li.innerHTML = "<div class=\"custom-control custom-checkbox\">\n" +
+                    "                                <input type=\"checkbox\" class=\"custom-control-input\" checked>\n" +
+                    "                                <label class=\"custom-control-label\">" + list_friends[i].firstname + " " + list_friends[i].lastname + "</label>\n" +
+                    "                            </div>";
+                list_members_update.push(list_friends[i]);
+                list_members_temp.splice(j, 1);
+                checked = true;
+                break;
+            }
+        }
+        if (checked === false) {
+            li.innerHTML = "<div class=\"custom-control custom-checkbox\">\n" +
+                "                                <input type=\"checkbox\" class=\"custom-control-input\">\n" +
+                "                                <label class=\"custom-control-label\">" + list_friends[i].firstname + " " + list_friends[i].lastname + "</label>\n" +
+                "                            </div>";
+            list_members_update.push(list_friends[i]);
+        }
+        ul_list_friends_groupchat_update.appendChild(li);
+    }
+    for (var k = 1; k < list_members_temp.length; k++) {
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = "<div class=\"custom-control custom-checkbox\">\n" +
+            "                                <input type=\"checkbox\" class=\"custom-control-input\" checked>\n" +
+            "                                <label class=\"custom-control-label\">" + list_members_temp[k].firstname + " " + list_members_temp[k].lastname + "</label>\n" +
+            "                            </div>";
+        ul_list_friends_groupchat_update.appendChild(li);
+        list_members_update.push(list_members_temp[k]);
+    }
+});
+
+// Select friend (update group chat)
+$('#ul_list_friends_groupchat_update').on('click', 'li', function (event) {
+    event.preventDefault();
+    var checkbox = $(this).find("input[type='checkbox']");
+    if (checkbox.is(':checked')) {
+        checkbox.prop('checked', false);
+    } else {
+        checkbox.prop('checked', true);
+    }
+});
+
+// Event update group chat:
+$('#btn_update_group_chat').click(function () {
+    // Event update group chat
+    var name = $('#group_name_update').val();
+    var description = $('#description_update').val();
+    var created_by = userID.trim();
+    var participants = [];
+    participants.push(userID);
+    $('#ul_list_friends_groupchat_update').find("input:checkbox:checked").each(function () {
+        var index = $(this).parent().parent().index();
+        participants.push(list_members_update[index]._id);
+        $(this).prop('checked', false);
+    });
+    var data = {
+        _id: idConversationSelected,
+        name: name,
+        description: description,
+        created_by: created_by,
+        participants: participants
+    };
+
+    socket.emit("event-update-group-chat", data);
+    $("#updateGroup").modal('hide');
+});
+
 // Delete conversation
 $('#btn_delete_group').click(function () {
-    socket.emit("event-delete-group", idConversationSelected);
+    $('#deleteGroup').modal('toggle');
+});
+
+// Confirm remove conversation
+$('#btn_confirm_delete_group').click(function () {
+    $.ajax({
+        url: "/delete_conversation",
+        type: "POST",
+        data: {_id: idConversationSelected},
+        success: function (response) {
+            window.location.replace("/");
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+        }
+    });
 });
 
 // Search Chats
 $('#input_search_chat').keyup(function () {
 
     var that = this, $allListElements = $('#ul-list-friends > li');
+
+    var $matchingListElements = $allListElements.filter(function (i, li) {
+        var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();
+        return ~listItemText.indexOf(searchText);
+    });
+
+    $allListElements.hide();
+    $matchingListElements.show();
+
+});
+
+// Search friends in update group chat
+$('#input_search_friends_update').keyup(function () {
+
+    var that = this, $allListElements = $('#ul_list_friends_groupchat_update > li');
 
     var $matchingListElements = $allListElements.filter(function (i, li) {
         var listItemText = $(li).text().toUpperCase(), searchText = that.value.toUpperCase();

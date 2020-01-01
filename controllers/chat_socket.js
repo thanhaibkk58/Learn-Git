@@ -1,8 +1,4 @@
 var socketio = require('socket.io');
-var mongoose = require('mongoose');
-var events = require("events");
-var eventEmitter = new events.EventEmitter();
-var checkAuthentication = require("../utils/check_authentication");
 
 var friends_controller = require("./friends_controller");
 var messages_controller = require("./messages_controller");
@@ -16,23 +12,20 @@ module.exports.sockets = function (http) {
     var io = socketio.listen(http);
 
     var ioChat = io.of("/");
-    var userID;
     var currentRoom;
 
     ioChat.on("connection", function (socket) {
         console.error("A user connected: " + socket.id);
         socket.on("set-info-user", function (user_id) {
-            userID = user_id.trim();
-            console.error(userID + " is logged in!");
-            //
-            socket.join(user_id);
+            var userID = user_id.trim();
+            socket.join(userID);
 
             friends_controller.getAllFriends(userID, function (err, friends) {
                 if (err) console.error(err);
                 socket.emit("set-all-friends", JSON.stringify(friends));
             });
 
-            conversations_controller.getAllConversations(user_id, function (err, conversations) {
+            conversations_controller.getAllConversations(userID, function (err, conversations) {
                 if (err) console.error(err);
                 socket.emit("set-all-groups", JSON.stringify(conversations));
             });
@@ -57,11 +50,12 @@ module.exports.sockets = function (http) {
             });
         });
 
-        socket.on("confirm-request-friend", function (id_request) {
-            friends_controller.acceptFriend(id_request, userID, function (err, result) {
+        socket.on("confirm-request-friend", function (data) {
+            friends_controller.acceptFriend(data.idFriend, function (err, result) {
                 if (err) console.error(err);
-                socket.broadcast.to(id_request).emit('noti-confirm-request-friend', result);
-                friends_controller.getAllFriends(userID, function (err, friends) {
+                socket.join(result.userID1);
+                socket.broadcast.to(result.userID1).emit('noti-confirm-request-friend', result);
+                friends_controller.getAllFriends(data.userID, function (err, friends) {
                     if (err) console.error(err);
                     socket.emit("set-all-friends", JSON.stringify(friends));
                 });
@@ -69,22 +63,22 @@ module.exports.sockets = function (http) {
         });
 
         socket.on("event-add-friend", function (data) {
-            friends_controller.addFriend(userID, data, function (err, result) {
+            friends_controller.addFriend(data.userID1, data.userID2, function (err, result) {
                 if (err) console.error(err);
-                socket.join(data);
-                socket.broadcast.to(data).emit('noti-sent-request-friend', result);
+                socket.join(data.userID2);
+                socket.broadcast.to(data.userID2).emit('noti-sent-request-friend', result);
             })
         });
 
-        socket.on("delete-request-friend", function (id_request) {
-            friends_controller.deleteRequest(id_request, userID, function (result) {
-                // Do something
+        socket.on("delete-request-friend", function (data) {
+            friends_controller.deleteRequest(data, function (err, result) {
+                console.error(err);
             });
         });
 
-        socket.on("cancel-request-friend", function (userID2) {
-            friends_controller.deleteRequest(userID, userID2, function (result) {
-                // Do something
+        socket.on("cancel-request-friend", function (data) {
+            friends_controller.deleteRequest(data, function (err, result) {
+                console.error(err);
             });
         });
 
@@ -125,11 +119,12 @@ module.exports.sockets = function (http) {
             });
         });
 
-        socket.on("event-delete-group", function (idConversationSelected) {
-            conversations_controller.deleteConversation(idConversationSelected, function (err, data) {
+        socket.on("event-update-group-chat", function (data) {
+            conversations_controller.updateConversations(data._id, data.name, data.participants, data.description, function (err, result) {
                 if (err) console.error(err);
-                // Thong bao cho thanh vien trong group
-            });
-        })
+                // Realtime
+            })
+        });
+
     });
 };

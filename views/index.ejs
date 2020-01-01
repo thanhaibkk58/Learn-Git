@@ -16,63 +16,6 @@
 </head>
 <body class="dark">
 
-<!-- page loading -->
-<div class=""></div>
-<!-- ./ page loading -->
-
-<!-- disconnected modal -->
-<div class="modal fade" id="disconnected" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="connection-error">
-                    <h4 class="text-center">Application disconnected...</h4>
-                    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
-                         xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                         y="0px"
-                         width="862.899px" height="862.9px" viewBox="0 0 862.899 862.9"
-                         style="enable-background:new 0 0 862.899 862.9;"
-                         xml:space="preserve">
-                        <g>
-                            <g>
-                                <circle cx="385.6" cy="656.1" r="79.8"/>
-                                <path d="M561.7,401c-15.801-10.3-32.601-19.2-50.2-26.6c-39.9-16.9-82.3-25.5-126-25.5c-44.601,0-87.9,8.9-128.6,26.6
-                                    c-39.3,17-74.3,41.3-104.1,72.2L253.5,545c34.899-36.1,81.8-56,132-56c49,0,95.1,19.1,129.8,53.8l25.4-25.399L493,469.7L561.7,401
-                                    z"/>
-                                <path d="M385.6,267.1c107.601,0,208.9,41.7,285.3,117.4l98.5-99.5c-50-49.5-108.1-88.4-172.699-115.6
-                                    c-66.9-28.1-138-42.4-211.101-42.4c-73.6,0-145,14.4-212.3,42.9c-65,27.5-123.3,66.8-173.3,116.9l99,99
-                                    C175.5,309.299,277.3,267.1,385.6,267.1z"/>
-                                <polygon points="616.8,402.5 549.7,469.599 639.2,559.099 549.7,648.599 616.8,715.7 706.3,626.2 795.8,715.7 862.899,648.599
-                                    773.399,559.099 862.899,469.599 795.8,402.5 706.3,492 		"/>
-                            </g>
-                        </g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                        <g></g>
-                    </svg>
-                </div>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary btn-lg">Reconnect</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- ./ disconnected modal -->
-
 <!-- new group modal -->
 <div class="modal fade" id="newGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
@@ -116,6 +59,74 @@
     </div>
 </div>
 <!-- ./ new group modal -->
+
+<!-- update group modal -->
+<div class="modal fade" id="updateGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-users"></i> Update Group
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="group_name" class="col-form-label">Group name</label>
+                        <input type="text" class="form-control" id="group_name_update">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="users" class="col-form-label">Find friends</label>
+                        <input type="text" class="form-control" placeholder="Search ..." id="input_search_friends">
+                    </div>
+
+                    <ul class="list-group list-group-flush" style="height: 200px; overflow: scroll; overflow-x: hidden;"
+                        id="ul_list_friends_groupchat_update">
+                        <!-- List friends (Update) -->
+                    </ul>
+
+                    <div class="form-group">
+                        <label for="description" class="col-form-label">Description</label>
+                        <textarea class="form-control" id="description_update"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btn_update_group_chat" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ update group modal -->
+
+<!-- update group modal -->
+<div class="modal fade" id="deleteGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 30px">
+                <h6 class="modal-title">
+                    <i class="fa fa-users"></i> Delete Group
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Delete this group and all messages... You sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn_confirm_delete_group">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ update group modal -->
 
 <!-- edit profile modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -456,7 +467,7 @@
         <!-- ./ sidebar group -->
 
         <!-- chat -->
-        <div class="chat">
+        <div class="chat" id="tab_chat">
             <div class="chat-header">
                 <div class="chat-header-user">
                     <figure class="avatar avatar-lg">
@@ -496,7 +507,7 @@
         </div>
         <!-- ./ chat -->
 
-        <div class="sidebar-group">
+        <div class="sidebar-group" id="tab_info">
             <div id="contact-information" class="sidebar active">
                 <header>
                     <span>About</span>
@@ -541,6 +552,11 @@
                             <p class="text-muted">+84 366 675 787</p>
                         </div>
                         <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Total number of messages</h6>
+                            <p class="text-muted" id="total_messages">0</p>
+                        </div>
+                        <hr>
                         <div class="form-group text-xl-center">
                             <button id="btn_delete_friend" type="button" class="btn btn-outline-danger btn-block">Delete
                                 Friend
@@ -560,9 +576,14 @@
                             <!-- Add member -->
                         </ul>
                         <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Total number of messages</h6>
+                            <p class="text-muted" id="total_messages_group">0</p>
+                        </div>
+                        <hr>
                         <div class="form-group text-xl-center">
-                            <button id="btn_add_member" type="button" class="btn btn-outline-primary btn-block">
-                                + Add Member
+                            <button id="btn_update_group" type="button" class="btn btn-outline-primary btn-block">
+                                Update Group
                             </button>
                         </div>
                         <hr>

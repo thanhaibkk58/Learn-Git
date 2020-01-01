@@ -21,12 +21,19 @@ function getAllPrivateMessage(roomID, callback){
     });
 }
 
-function deleteMessage(){
-    return null;
+// Delete all messages in PM or group chat
+function deleteMessages(receiver, callback){
+    var filter = {
+        receiver: receiver
+    };
+    Message.deleteMany(filter, function (err, data) {
+        if (err) callback(err, null);
+        callback(null, data);
+    });
 }
 
 module.exports = {
     createNewMessage,
     getAllPrivateMessage,
-    deleteMessage
+    deleteMessages
 };
