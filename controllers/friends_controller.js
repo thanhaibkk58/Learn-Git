@@ -34,31 +34,21 @@ function getAllRequestFriends(userID, callback){
     });
 }
 
-function acceptFriend(userID1, userID2, callback){
-    var filter = {
-        userID1: userID1,
-        userID2: userID2,
-        status: false
-    };
+function acceptFriend(idFriend, callback){
     var update = {
         status: true
     };
 
-    Friend.findOneAndUpdate(filter, update).populate("userID2").exec(function (err, result) {
+    Friend.findByIdAndUpdate(idFriend, update).populate("userID2").exec(function (err, result) {
         if (err) callback(err, null);
         callback(null, result);
     });
 }
 
-function deleteRequest(userID1, userID2, callback){
-    var filter = {
-        userID1: userID1,
-        userID2: userID2,
-        status: false
-    };
-    Friend.findOneAndDelete(filter, function (err, result) {
+function deleteRequest(idFriend, callback){
+    Friend.findByIdAndRemove({_id: idFriend}, function (err, result) {
         if (err) callback(err, null);
-        callback(null, result)
+        callback(null, result);
     });
 }
 

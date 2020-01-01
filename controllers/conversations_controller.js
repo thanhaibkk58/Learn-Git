@@ -10,6 +10,18 @@ function createConversation(conversation, callback) {
     });
 }
 
+function updateConversations(_id, name, participants, description, callback) {
+    var upadte = {
+        name: name,
+        participants: participants,
+        description: description
+    };
+    Conversation.findByIdAndUpdate(_id, upadte, function (err, result) {
+        if (err) callback(err, null);
+        callback (null, result);
+    });
+}
+
 function getAllConversations(userID, callback){
     Conversation.find({participants: userID}, function (err, result) {
         if (err) callback(err, null);
@@ -30,5 +42,6 @@ function deleteConversation(id, callback){
 module.exports = {
     createConversation,
     getAllConversations,
-    deleteConversation
+    deleteConversation,
+    updateConversations
 };

@@ -16,6 +16,7 @@ var config = require("./utils/config");
 var indexRouter = require('./routes/index');
 var users = require("./routes/users");
 var friends = require("./routes/friends");
+var conversations = require("./routes/conversations");
 var uploadFile = require("./routes/upload");
 
 var app = express();
@@ -66,6 +67,7 @@ app.use('/', indexRouter);
 
 app.use(users);
 app.use(friends);
+app.use(conversations);
 app.use(uploadFile);
 
 // catch 404 and forward to error handler
