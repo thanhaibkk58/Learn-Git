@@ -37,7 +37,7 @@ var ChatSocket = {
             }
         },
 
-        // Test add image:
+        // Add image:
         addImage: function (message, time, type, firstname) {
             var chat_body = $('.layout .content .chat .chat-body');
             if (chat_body.length > 0) {
@@ -46,6 +46,25 @@ var ChatSocket = {
                 message = message ? message : 'Null';
 
                 $('.layout .content .chat .chat-body .messages').append('<li style="list-style-type: none" class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div><img class="message-content" style="width:360px;" src="' + message + '" ></img></div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></li>');
+
+                chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
+                    cursorcolor: 'rgba(66, 66, 66, 0.20)',
+                    cursorwidth: "4px",
+                    cursorborder: '0px'
+                }).resize();
+            }
+        },
+
+        // Add Sticker
+        addSticker: function (message, time, type, firstname) {
+            var chat_body = $('.layout .content .chat .chat-body');
+            if (chat_body.length > 0) {
+
+                type = type ? type : '';
+                message = message ? message : 'Null';
+
+                $('.layout .content .chat .chat-body .messages').append('<li style="list-style-type: none" class="message-item ' + type + '"><div class="message-action">' + firstname + '</div><div aria-label=" peeping, character peeping around corner sticker" class="_2poz _ui9" data-testid="sticker" role="img" tabindex="0" style="' + message + '"></div><div class="message-action">' + time + ' ' + '' + (type ? '<i class="ti-check"></i>' : '') + '</div></li>');
+
 
                 chat_body.scrollTop(chat_body.get(0).scrollHeight, -1).niceScroll({
                     cursorcolor: 'rgba(66, 66, 66, 0.20)',
@@ -250,13 +269,17 @@ socket.on("get-old-messages", function (json_data) {
             total_messages_me += 1;
             if (data[i].type === "text") {
                 ChatSocket.Message.addText(message, date, 'outgoing-message', data[i].sender.firstname);
+            } else if (data[i].type === "sticker"){
+                ChatSocket.Message.addSticker(message, date, 'outgoing-message', data[i].sender.firstname);
             } else {
                 ChatSocket.Message.addImage(message, date, 'outgoing-message', data[i].sender.firstname);
             }
         } else {
             if (data[i].type === "text") {
                 ChatSocket.Message.addText(message, date, '', data[i].sender.firstname);
-            } else {
+            } else if (data[i].type === "sticker"){
+                ChatSocket.Message.addSticker(message, date, '', data[i].sender.firstname);
+            }  else {
                 ChatSocket.Message.addImage(message, date, '', data[i].sender.firstname);
             }
         }
@@ -269,7 +292,6 @@ var index_message;
 $('#ul_list_message').on('click', 'li', function (event) {
     event.stopPropagation();
     index_message = $(this).index();
-    console.log("index: "+ index_message);
     $('#deleteMessage').modal('toggle');
 });
 
@@ -331,19 +353,99 @@ $("#input_image").change(function () {
     });
 });
 
+// Send sticker
+$('#btn_send_sticker').click(function (event) {
+    event.stopPropagation();
+    $('#stickerModal').modal('toggle');
+});
+
+$('#table_stikers').on('click', 'td', function (event) {
+    event.stopPropagation();
+    var index_sticker = $(this).index() + $(this).parent().index() * 4;
+    var sticker;
+    switch (index_sticker) {
+        case 0:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53604616_2313955348840625_1262474566865780736_n.png?_nc_cat=111&amp;_nc_ohc=DxY2dJ4AUocAQkdk48DM65as4CfmrAJ0paQJSPDTUeyGtf3ZCphCiO53Q&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=798bacd0ee3f2db98e0731427abefabf&amp;oe=5EAF32F5&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 1:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53725816_2313954778840682_3653047002972815360_n.png?_nc_cat=111&amp;_nc_ohc=3RIYGQupbnEAQmH4f_g2MWSTbEiKVDwQLcqh0xeAj08_0KRXs026VlPXQ&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=917a4251ea0e496c1c9d3c1301d3d4a4&amp;oe=5EAF1C58&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -156px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 2:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53596069_2313955192173974_874375618282651648_n.png?_nc_cat=110&amp;_nc_ohc=FnIAmOZ0xEMAQmnYWNt7rLPeziOtWC1jSBmN2JUjDxzrP5mu_c4kE32cw&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=6dbbf2a50158513ee3a0462d8ada1052&amp;oe=5EA4D4C1&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -444px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 3:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53742771_2313955015507325_4224406098632769536_n.png?_nc_cat=105&amp;_nc_ohc=fFjd3Cs4f3kAQlahMysDUpPoeeov8jXz7iUEytA-ADFeywT-6-5NzZqTA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=210890a77057a9dbb5fbb5dafc11bc79&amp;oe=5E9D1745&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast";
+            break;
+        case 4:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53683326_2313955542173939_9100309296700194816_n.png?_nc_cat=106&amp;_nc_ohc=VZrTZOcBf2oAQmnKHFeGq-Q483pHQ72zHGz0a6yTL23-NIVdtXy-qCcTA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=5408f90bb6fd36634e3bd9b66d1cf19a&amp;oe=5EABD7DF&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 5:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53640982_2313954495507377_8604057578340614144_n.png?_nc_cat=109&amp;_nc_ohc=YvkPYRJa0EEAQn5toRdCWXutYcJJ30k20zyoE9Tfv9Wm-MZZB8Y3PkUTA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=f03bedf19ce0cacab4ed070fe0050647&amp;oe=5E6B50F0&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 6:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53449099_2313955895507237_108886899946422272_n.png?_nc_cat=100&amp;_nc_ohc=35qTDPFXh24AQkqy9QCxqiqwvVhC3nHCZs6sDTrx8B_Le-dAsQry6JQow&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=04dcadbe865d169d468c5f89ca4577bb&amp;oe=5E9BEA00&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 7:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53570619_2313954322174061_3110237216354336768_n.png?_nc_cat=102&amp;_nc_ohc=8lXS-wx3CG8AQnU2DgBAeGpAD3jvslcGbw-fgOVhFScGIde7_bGS7gPog&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=901d1d497ad15aeb71f9bbdc45daa61c&amp;oe=5E9CC283&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 8:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53666578_2313956045507222_1146202109876633600_n.png?_nc_cat=111&amp;_nc_ohc=MC1dk-b89-8AQmG46Lgc6udEKv_gyVANJJcyEGPPlvwlpUqvAjaTkijUA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=7ea27bb4fc788d26a2e54bf789969c26&amp;oe=5EB30732&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 9:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53673963_2313956205507206_1117656670600691712_n.png?_nc_cat=107&amp;_nc_ohc=71bhGfKAuIwAQlyLZxN0oZhKLUXpChLcdYC1wVTbbBsoZq0IvPATnlY2g&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=b058c1e8b830b86673e8a82ccf055cbf&amp;oe=5EA08A91&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -156px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 10:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53695748_2313956508840509_2686562027161255936_n.png?_nc_cat=103&amp;_nc_ohc=Rd8Em3bfqZQAQmOm1y-Yxtj-mrIjsn1Nv6sAR4zHngbOz0d4T_xKTkmDg&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=d8630ae4bf65b2f6db5d4c0181378130&amp;oe=5EAE550A&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 11:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53576079_2313956838840476_5029162856847769600_n.png?_nc_cat=110&amp;_nc_ohc=Fer9aQvQ9xMAQlk3Km02xqKbHOJCYZrL9DiMik95JK1ZlzxEx6WM-lnBg&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=ce4bbba5ff44f01734cc033cbf07b3f4&amp;oe=5EAB282B&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 12:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53662946_2313957122173781_4796252114735071232_n.png?_nc_cat=107&amp;_nc_ohc=Al_M9Li0WM4AQnrYET4at2q6XkMrfzCkDQUsiLJsg_FzcOtlmJcYa3CfQ&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=e8d46e652cb1d01eaebac16c879241d3&amp;oe=5EA39D81&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 13:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53585124_2313956672173826_1846191108070047744_n.png?_nc_cat=107&amp;_nc_ohc=8GNyiQoW7w8AQnczWz3MTdSiFBxnUGXfm_zHWTFzRtez5cG2gmF6SV_VA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=32c05aacff93593e438d06ca41e7e464&amp;oe=5E6711D6&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 14:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53624079_2313956985507128_5117085256918237184_n.png?_nc_cat=102&amp;_nc_ohc=5EHgZoF1EwYAQk43gHCENqUOCuGFltwnjYfHsZAX_ddfEx9yLeX5fOBUA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=905e5821c304c4a1d3a6ee44071f8ce2&amp;oe=5EAD265C&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 15:
+            sticker = "background-image: url(&quot;https://scontent.xx.fbcdn.net/v/t39.1997-6/53524962_2313957425507084_560995618747580416_n.png?_nc_cat=105&amp;_nc_ohc=3Ph5PDU8mXcAQlUXKHjo-qK6XcX_tajsvV6L_Yl2-QnQNIz1LVK7BGWmA&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zor=9&amp;_nc_ht=scontent.xx&amp;oh=2aeaf18c09fee57a836cb87015aef04c&amp;oe=5E97F890&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 16:
+            sticker = "background-image: url(&quot;https://scontent.fhan2-3.fna.fbcdn.net/v/t39.1997-6/53613012_2313957242173769_2233453431383654400_n.png?_nc_cat=107&amp;_nc_oc=AQlbtj5o7vuSDLr_1ODS0bKrMibpfdrnljCt-nuIsPnvdUp5dVMh-z3Xj0eRwcbNhg0&amp;_nc_ht=scontent.fhan2-3.fna&amp;oh=47d050c6c3cb99ad8d33993bb0317233&amp;oe=5EAEF9C0&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 17:
+            sticker = "background-image: url(&quot;https://scontent.fhan2-1.fna.fbcdn.net/v/t39.1997-6/53651915_2313957735507053_840801700016029696_n.png?_nc_cat=106&amp;_nc_oc=AQlOXd3HmQ639SiBN7gZuFEP7BC2AyZuirhFJxT0EH-dFeGm_6TVm1fc5reiMXR1yf8&amp;_nc_ht=scontent.fhan2-1.fna&amp;oh=765c8c684f76a8e8d586079ce8e8c69c&amp;oe=5E9E2C4A&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -12px -12px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 18:
+            sticker = "background-image: url(&quot;https://scontent.fhan2-3.fna.fbcdn.net/v/l/t39.1997-6/53561531_2313957558840404_4162334522601373696_n.png?_nc_cat=108&amp;_nc_oc=AQn0KYysKdho8GkysGiavRCsg1bECw1ENmMvze8PvO6xD5vUyz_ehKmX8JvjK50GhQ8&amp;_nc_ht=scontent.fhan2-3.fna&amp;oh=aa0e27227ea2c2b8b6f5afcf14aca1c6&amp;oe=5EADF26C&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -444px -300px; image-rendering: -webkit-optimize-contrast;";
+            break;
+        case 19:
+            sticker = "background-image: url(&quot;https://scontent.fhan2-1.fna.fbcdn.net/v/t39.1997-6/53629973_2313958098840350_5663473240920555520_n.png?_nc_cat=101&amp;_nc_oc=AQkdfhU61Ro7FVrn3Sr4c5tJHgUqt-gH5mfSR8oSC9xmxITxOgoSQSd7a8-UEzP62Lc&amp;_nc_ht=scontent.fhan2-1.fna&amp;oh=90db414b223b7672d705335c8fb52c5c&amp;oe=5E6E8BCB&quot;); background-size: 576px 432px; cursor: pointer; height: 120px; width: 120px; background-position: -444px -156px; image-rendering: -webkit-optimize-contrast;";
+            break;
+    }
+    socket.emit("send-message-to-server", {message: sticker, userID: userID, type: "sticker", toUser: idUserSelected});
+    $('#stickerModal').modal('hide');
+});
+
 socket.on("emit-message-to-receiver", function (data) {
     messages.push(data);
     var date = formatDate(new Date(data.created_at));
     if (data.sender._id === userID){
         if (data.type === "text") {
             ChatSocket.Message.addText(data.content, date, 'outgoing-message', data.sender.firstname);
+        } else if (data.type === "sticker"){
+            ChatSocket.Message.addSticker(data.content, date, 'outgoing-message', data.sender.firstname);
         } else {
             ChatSocket.Message.addImage(data.content, date, 'outgoing-message', data.sender.firstname);
         }
     } else {
         if (data.type === "text") {
             ChatSocket.Message.addText(data.content, date, '', data.sender.firstname);
-        } else {
+        } else if (data.type === "sticker"){
+            ChatSocket.Message.addSticker(data.content, date, '', data.sender.firstname);
+        }else {
             ChatSocket.Message.addImage(data.content, date, '', data.sender.firstname);
         }
     }
