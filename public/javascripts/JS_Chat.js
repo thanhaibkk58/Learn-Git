@@ -178,7 +178,7 @@ socket.on("noti-delete-friend", function (data) {
 
 // Noti: create group chat
 socket.on("noti-create-groupchat", function (data) {
-    var noti = "";
+    let noti = "";
     if (userID !== data.created_by._id){
         noti = data.created_by.firstname + " " + data.created_by.lastname + " has added you to a group.";
         $('#message-noti').text(noti);
@@ -189,7 +189,74 @@ socket.on("noti-create-groupchat", function (data) {
 
 // Noti: update group chat
 socket.on("noti-update-groupchat", function (data) {
-    console.log(data);
+    let index = -1;
+    for (let i = 0; i < list_groups.length; i++){
+        if (data._id === list_groups[i]._id){
+            index = i;
+            break;
+        }
+    }
+    if (index === -1) {
+        let noti = data.participants[0].firstname + " " + data.participants[0].lastname + " has added you to a group.";
+        $('#message-noti').text(noti);
+        $('#notificationModal').modal('show');
+        list_groups.push(data);
+        let ul_list_groups = document.getElementById("ul-list-groups");
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = "" +
+            "                            <figure class=\"avatar\">\n" +
+            "                                <img src=\" " + data.avatar_url + "\" class=\"rounded-circle\">\n" +
+            "                            </figure>\n" +
+            "                            <div class=\"users-list-body\">\n" +
+            "                                <h5>Group: " + data.name + "</h5>\n" +
+            "                                <p>Online</p>\n" +
+            "                            </div>"
+
+        ul_list_groups.appendChild(li);
+    } else {
+        list_groups[index] = data;
+        if (data._id === idConversationSelected){
+            document.getElementById("fr_chat_fullname").innerHTML = "Group: " + list_groups[index_group_selected].name;
+            document.getElementById("fr_chat_avatar").src = list_groups[index_group_selected].avatar_url;
+
+            document.getElementById("profile_friend_fullname").innerHTML = "Group: " + list_groups[index_group_selected].name;
+            document.getElementById("info_group_description").innerHTML = list_groups[index_group_selected].description;
+            document.getElementById("profile_friend_avt").src = list_groups[index_group_selected].avatar_url;
+
+            $('#ul-list-groups li').eq(index_group_selected).find('h5').text("Group: " + list_groups[index_group_selected].name);
+
+            if (list_groups[index_group_selected].participants[0]._id ===  userID){
+                $('#isAdminGroup').show();
+            } else {
+                $('#isAdminGroup').hide();
+            }
+
+            $('#div_profile_friend').hide();
+            let ul_list_members = document.getElementById("ul_list_members");
+            $('#ul_list_members').empty();
+
+            let rule;
+            for (let i = 0; i < list_groups[index_group_selected].participants.length; i++) {
+                if (i === 0) rule = "Admin";
+                else rule = "Member";
+                let li_member = document.createElement("li");
+                li_member.className = "list-group-item";
+                li_member.innerHTML = "" +
+                    "                            <figure class=\"avatar\">\n" +
+                    "                                <img src=\" " + list_groups[index_group_selected].participants[i].avatar_url + "\" class=\"rounded-circle\">\n" +
+                    "                            </figure>\n" +
+                    "                            <div class=\"users-list-body\">\n" +
+                    "                                <h5>" + list_groups[index_group_selected].participants[i].firstname + " " + list_groups[index_group_selected].participants[i].lastname + "</h5>\n" +
+                    "                                <p>" + rule + "</p>\n" +
+                    "                            </div>"
+
+                ul_list_members.appendChild(li_member);
+            }
+        } else {
+            $('#ul-list-groups li').eq(index).find('h5').text("Group: " + list_groups[index].name);
+        }
+    }
 });
 
 socket.on("noti-delete-groupchat", function (data) {
@@ -348,7 +415,13 @@ var index_message;
 $('#ul_list_message').on('click', 'li', function (event) {
     event.stopPropagation();
     index_message = $(this).index();
-    $('#deleteMessage').modal('toggle');
+    if (messages[index_message].sender._id === userID){
+        $('#deleteMessage').modal('toggle');
+    } else {
+        let noti = "You cannot delete this message.";
+        $('#message-noti').text(noti);
+        $('#notificationModal').modal('show');
+    }
 });
 
 $('#btn_delete_message').click(function () {
@@ -577,39 +650,40 @@ socket.on("set-all-friends", function (friends) {
             checkbox.prop('checked', true);
         }
     });
+});
 
-    // Event create group chat
-    $('#btn_create_group_chat').click(function () {
-        var name = $('#group_name').val();
-        var description = $('#description').val();
-        var created_by = userID.trim();
-        var participants = [];
-        participants.push(userID);
-        $('#ul_list_friends_groupchat').find("input:checkbox:checked").each(function () {
-            var index = $(this).parent().parent().index();
-            participants.push(list_friends[index]._id);
-            $(this).prop('checked', false);
-        });
-        var data = {
-            name: name,
-            description: description,
-            created_by: created_by,
-            participants: participants
-        };
-
-        socket.emit("event-create-group-chat", data);
-        $("#newGroup").modal('hide');
+// Event create group chat
+$('#btn_create_group_chat').click(function () {
+    console.log("Tao nhom chat");
+    var name = $('#group_name').val();
+    var description = $('#description').val();
+    var created_by = userID.trim();
+    var participants = [];
+    participants.push(userID);
+    $('#ul_list_friends_groupchat').find("input:checkbox:checked").each(function () {
+        var index = $(this).parent().parent().index();
+        participants.push(list_friends[index]._id);
+        $(this).prop('checked', false);
     });
+    var data = {
+        name: name,
+        description: description,
+        created_by: created_by,
+        participants: participants
+    };
+
+    socket.emit("event-create-group-chat", data);
+    $("#newGroup").modal('hide');
 });
 
 // All groups
 socket.on("set-all-groups", function (data) {
-    var groups = JSON.parse(data);
+    let groups = JSON.parse(data);
     list_groups = groups;
     $('#ul-list-groups').empty();
-    var ul_list_groups = document.getElementById("ul-list-groups");
+    let ul_list_groups = document.getElementById("ul-list-groups");
 
-    for (var i = 0; i < groups.length; i++) {
+    for (let i = 0; i < groups.length; i++) {
         let li_group = document.createElement("li");
         li_group.className = "list-group-item";
         li_group.innerHTML = "" +
@@ -624,7 +698,7 @@ socket.on("set-all-groups", function (data) {
         ul_list_groups.appendChild(li_group);
     }
 
-    $('#ul-list-groups li').click(function () {
+    $('#ul-list-groups').on('click', 'li', function () {
         $('#tab_chat').show();
         $('#tab_info').show();
         $('.layout .content .chat .chat-body .messages').empty();

@@ -154,7 +154,7 @@ module.exports.sockets = function (http) {
                 if (err) console.error(err);
                 else {
                     for (var i = 0; i < result.participants.length; i++){
-                        io.to(result.participants[i]).emit("noti-update-groupchat", result);
+                        io.to(result.participants[i]._id).emit("noti-update-groupchat", result);
                     }
                 }
             })
