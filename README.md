@@ -1,3 +1,2 @@
 # Learn-Git
-Project 1
-npm start
+run: npm start
