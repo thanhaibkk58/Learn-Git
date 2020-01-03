@@ -29,7 +29,6 @@ router.put("/update_conversation", checkAuthentication, function (req, res) {
     if (!req.body) return res.status(400);
     var conversation = new Conversation({
         _id: new mongoose.Schema.ObjectID,
-        type: "group",
         name: req.body.name,
         created_by: req.user.userID,
         created_at: Date.now()
