@@ -1,4 +1,5 @@
 var Conversation = require("../models/conversation");
+var message_controller = require("../controllers/messages_controller");
 
 function createConversation(conversation, callback) {
     Conversation.create(conversation, function (err, data) {
@@ -33,9 +34,12 @@ function getAllConversations(userID, callback){
 }
 
 function deleteConversation(id, callback){
-    Conversation.findByIdAndRemove({_id: id}, function (err, result) {
+    Conversation.findOneAndDelete({_id: id}, function (err, result) {
         if (err) callback(err, null);
-        callback(null, result);
+        message_controller.deleteMessages(result._id, function (err, data) {
+            if (err) callback(err, null);
+            callback(null, result);
+        });
     });
 }
 

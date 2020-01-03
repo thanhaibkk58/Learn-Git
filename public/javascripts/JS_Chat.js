@@ -12,6 +12,21 @@ var list_groups;
 var userID = document.getElementById("userID").value;
 var my_firstname = document.getElementById("firstname").value;
 
+function refreshClient(){
+    users_temp = [];
+    list_friends = [];
+    list_members_update = [];
+    idUserSelected = "";
+    messages = [];
+    idConversationSelected = -1;
+
+    index_group_selected = -1;
+    list_groups = [];
+    socket.emit("set-info-user", userID);
+    $('#tab_chat').hide();
+    $('#tab_info').hide();
+}
+
 socket.on("connect", function () {
     $('#tab_chat').hide();
     $('#tab_info').hide();
@@ -134,14 +149,54 @@ socket.on("set-all-request-friends", function (friends) {
 
 // Noti: confirm friend
 socket.on("noti-confirm-request-friend", function (data) {
-    socket.emit("set-info-user", userID);
-    alert(data.userID2.firstname + " " + data.userID2.lastname + " accepted your friend request!");
+    var noti = data.userID2.firstname + " " + data.userID2.lastname + " accepted your friend request!";
+    $('#message-noti').text(noti);
+    $('#notificationModal').modal('show');
+    refreshClient();
 });
 
 // Noti: send request
 socket.on("noti-sent-request-friend", function (data) {
-    alert(data.userID1.firstname + " " + data.userID1.lastname + " sent request friend!");
-    socket.emit("set-info-user", userID);
+    var noti = data.userID1.firstname + " " + data.userID1.lastname + " sent request friend!";
+    $('#message-noti').text(noti);
+    $('#notificationModal').modal('show');
+    refreshClient();
+});
+
+// Noti: delete friend
+socket.on("noti-delete-friend", function (data) {
+    var noti = "";
+    if (userID === data.userID1._id){
+        noti = data.userID2.firstname + " " + data.userID2.lastname + " has been removed from your friends list.";
+    } else {
+        noti = data.userID2.firstname + " " + data.userID2.lastname + " has been removed from your friends list.";
+    }
+    $('#message-noti').text(noti);
+    $('#notificationModal').modal('show');
+    refreshClient();
+});
+
+// Noti: create group chat
+socket.on("noti-create-groupchat", function (data) {
+    var noti = "";
+    if (userID !== data.created_by._id){
+        noti = data.created_by.firstname + " " + data.created_by.lastname + " has added you to a group.";
+        $('#message-noti').text(noti);
+        $('#notificationModal').modal('show');
+    }
+    refreshClient();
+});
+
+// Noti: update group chat
+socket.on("noti-update-groupchat", function (data) {
+    console.log(data);
+});
+
+socket.on("noti-delete-groupchat", function (data) {
+    var noti = "Group \"" + data + "\" has been deleted.";
+    $('#message-noti').text(noti);
+    $('#notificationModal').modal('show');
+    refreshClient();
 });
 
 socket.on("get-all-users", function (data) {
@@ -193,18 +248,19 @@ socket.on("get-all-users", function (data) {
 
 // Remove a friend
 $('#btn_delete_friend').click(function () {
-    $.ajax({
-        url: "/delete_friend",
-        type: "post",
-        data: {userID1: idUserSelected},
-        success: function (response) {
-            window.location.replace("/");
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.log(textStatus, errorThrown);
-        }
-    });
+    $('#deleteFriend').modal('show');
 });
+
+// Confirm: remove a friend
+$('#btn_confirm_delete_friend').click(function () {
+    var data = {
+        userID1: idUserSelected,
+        userID2: userID
+    };
+    socket.emit("event-delete-friend", data);
+    $('#deleteFriend').modal('hide');
+});
+
 
 // Get all users
 $(document).on('click', 'div.layout nav.navigation div.nav-group ul li.brackets', function (event) {
@@ -562,7 +618,7 @@ socket.on("set-all-groups", function (data) {
             "                            </figure>\n" +
             "                            <div class=\"users-list-body\">\n" +
             "                                <h5>Group: " + groups[i].name + "</h5>\n" +
-            "                                <p>Click me....</p>\n" +
+            "                                <p>Online</p>\n" +
             "                            </div>"
 
         ul_list_groups.appendChild(li_group);
@@ -585,12 +641,17 @@ socket.on("set-all-groups", function (data) {
         document.getElementById("info_group_description").innerHTML = groups[index].description;
         document.getElementById("profile_friend_avt").src = groups[index].avatar_url;
 
+        if (groups[index].participants[0]._id ===  userID){
+            $('#isAdminGroup').show();
+        } else {
+            $('#isAdminGroup').hide();
+        }
+
         $('#div_profile_friend').hide();
         var ul_list_members = document.getElementById("ul_list_members");
         $('#ul_list_members').empty();
 
         var rule = "";
-        console.log(groups[index]);
         for (var i = 0; i < groups[index].participants.length; i++) {
             if (i === 0) rule = "Admin";
             else rule = "Member";
@@ -702,17 +763,8 @@ $('#btn_delete_group').click(function () {
 
 // Confirm remove conversation
 $('#btn_confirm_delete_group').click(function () {
-    $.ajax({
-        url: "/delete_conversation",
-        type: "POST",
-        data: {_id: idConversationSelected},
-        success: function (response) {
-            window.location.replace("/");
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.log(textStatus, errorThrown);
-        }
-    });
+    socket.emit("event-delete-conversation", {_id: idConversationSelected});
+    $('#deleteGroup').modal('hide');
 });
 
 // Search Chats

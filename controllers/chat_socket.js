@@ -112,6 +112,25 @@ module.exports.sockets = function (http) {
             })
         });
 
+        socket.on("event-delete-friend", function (data) {
+            friends_controller.deleteFriend(data.userID1, data.userID2, function (err, result) {
+                if (err) console.error(err);
+                io.to(result.userID1._id).emit("noti-delete-friend", result);
+                io.to(result.userID2._id).emit("noti-delete-friend", result);
+            });
+        });
+
+        socket.on("event-delete-conversation", function (data) {
+            conversations_controller.deleteConversation(data, function (err, result) {
+                if (err) console.error(err);
+                else {
+                    for (var i = 0; i < result.participants.length; i++){
+                        io.to(result.participants[i]).emit("noti-delete-groupchat", result.name);
+                    }
+                }
+            });
+        });
+
         socket.on("event-create-group-chat", function (data) {
             var conversation = new Conversation({
                 name: data.name,
@@ -122,14 +141,22 @@ module.exports.sockets = function (http) {
 
             conversations_controller.createConversation(conversation, function (err, result) {
                 if (err) console.error(err);
-                // Thong bao cho thanh vien trong group
+                else {
+                    for (var i = 0; i < result.participants.length; i++){
+                        io.to(result.participants[i]).emit("noti-create-groupchat", result);
+                    }
+                }
             });
         });
 
         socket.on("event-update-group-chat", function (data) {
             conversations_controller.updateConversations(data._id, data.name, data.participants, data.description, function (err, result) {
                 if (err) console.error(err);
-                // Realtime
+                else {
+                    for (var i = 0; i < result.participants.length; i++){
+                        io.to(result.participants[i]).emit("noti-update-groupchat", result);
+                    }
+                }
             })
         });
 

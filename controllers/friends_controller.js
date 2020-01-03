@@ -54,13 +54,25 @@ function deleteRequest(idFriend, callback){
 
 function deleteFriend(userID1, userID2, callback){
     var filter = {
-        userID1: userID1,
-        userID2: userID2,
-        status: true
+        $or: [
+            {
+                userID1: userID1,
+                userID2: userID2,
+                status: true
+            },
+            {
+                userID1: userID2,
+                userID2: userID1,
+                status: true
+            }
+        ]
     };
     Friend.findOneAndDelete(filter, function (err, result) {
         if (err) callback(err, null);
-        callback(null, result)
+        Friend.populate(result, [{path:"userID1"}, {path:"userID2"}], function (err, data){
+            if (err) callback(err, null);
+            callback(null, data);
+        });
     });
 }
 
