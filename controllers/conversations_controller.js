@@ -17,9 +17,12 @@ function updateConversations(_id, name, participants, description, callback) {
         participants: participants,
         description: description
     };
-    Conversation.findByIdAndUpdate(_id, upadte, function (err, result) {
+    Conversation.findByIdAndUpdate(_id, upadte, {new: true}, function (err, result) {
         if (err) callback(err, null);
-        callback (null, result);
+        Conversation.populate(result, {path:"participants"}, function (err, data){
+            if (err) callback(err, null);
+            callback(null, data);
+        });
     });
 }
 
